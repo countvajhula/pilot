@@ -1,0 +1,20 @@
+Pilot is a graph database operator that allows you to perform typical application-level operations on graph databases without delving into the details of their implementation or requiring knowledge of the component technologies. 
+Pilot aims to support graph databases conforming to the "property graph model":http://github.com/tinkerpop/gremlin/wiki/Defining-a-Property-Graph. Pilot employs "Blueprints":http://blueprints.tinkerpop.com and "Gremlin":http://gremlin.tinkerpop.com for general access and manipulation of the underlying graph database, but also uses native graph database APIs to further optimize performance for certain operations. In addition, Pilot also handles multithreading and transaction management, while keeping all of these abstracted away from the calling application.
+
+Currently, the only graph database provider supported is "OrientDB":http://www.orientechnologies.com, but more will be added in future, including "Neo4j":http://neo4j.org.
+
+* Some of the functionality currently supported by Pilot include:
+** Get edges between given vertices
+** Get neighbors of a given vertex
+** Retrieving vertices corresponding to some properties (see Property Graph Model)
+** Transaction management
+** Thread synchronization for multithreaded access (alpha)
+** Large commit optimization (alpha)
+
+* Planned features:
+** FOAF
+** DFS
+** BFS
+
+Documentation is on the way! The API is represented in GraphInterface.groovy, so for now looking at that file should give an idea of its use.
+
