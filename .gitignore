@@ -1,0 +1,36 @@
+# xcode noise
+*/build/*
+*/*.pbxuser
+*/*/*.pbxuser
+*/*.mode1v3
+*/*/*.mode1v3
+
+# old skool
+.svn
+
+# osx noise
+.DS_Store
+profile
+
+# vim noise
+*~
+*/*~
+*/*/*~
+*/*/*/*~
+*swp
+*/*swp
+*/*/*swp
+*/*/*/*swp
+
+#python build output
+*pyc
+*/*pyc
+*/*/*pyc
+*/*/*/*pyc
+
+#webserver stuff
+#.htaccess
+#mysite.fcgi
+
+# db dump
+*dump
