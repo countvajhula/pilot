@@ -1,0 +1,4 @@
+Pilot graph database operator copyright (C) 2011 AisleBuyer, LLC.
+
+Pilot is distributed as Open Source under the Apache License, Version 2.0:
+http://www.apache.org/licenses/LICENSE-2.0
