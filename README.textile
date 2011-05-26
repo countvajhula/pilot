@@ -8,7 +8,7 @@ Currently, the only graph database provider supported is "OrientDB":http://www.o
 ** Get neighbors of a given vertex
 ** Retrieving vertices corresponding to some properties (see Property Graph Model)
 ** Transaction management
-** Thread synchronization for multithreaded access (alpha)
+** Thread synchronization for multithreaded access
 ** Large commit optimization (alpha)
 
 * Planned features:
