@@ -21,7 +21,7 @@ public interface GraphInterface {
 
 	void initializeGraph(String url, GraphProvider graphProvider, boolean readOnly);
 	void reinitializeGraph();
-	void shutdownGraph();
+	void shutdown();
 	Graph getGraph();
 	String getGraphUrl();
 	void beginManagedTransaction();
@@ -29,18 +29,18 @@ public interface GraphInterface {
 	void concludeManagedTransaction();
 	CommitManager getCommitManager();
 	void declareIntent(MutationIntent intent);
-	void clearGraph();
+	void clear();
 	List getVertices(String idProp);
 	List getEdges(String idProp);
 	long getVertexCount();
 	long getEdgeCount();
 	List getNeighbors(Vertex v, String idProp, String alongEdge);
-	Vertex getGraphVertex(String property, String value);
-	Vertex addGraphVertex(Object id);
-	Edge getGraphEdge(Vertex v1, Vertex v2, String edgeLabel);
-	Edge addGraphEdge(Vertex v1, Vertex v2, String edgeLabel);
-	void removeGraphVertex(Vertex vv);
-	void removeGraphEdge(Edge ee);
+	Vertex getVertex(String property, String value);
+	Vertex addVertex(Object id);
+	Edge getEdge(Vertex v1, Vertex v2, String edgeLabel);
+	Edge addEdge(Vertex v1, Vertex v2, String edgeLabel);
+	void removeVertex(Vertex vv);
+	void removeEdge(Edge ee);
 	void setElementProperty(Element elem, String property, Object value);
 	Object getElementProperty(Element elem, String property);
 	

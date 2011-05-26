@@ -26,13 +26,13 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 		Object result
 		try {
 			switch (m.getName()) {
-				case "clearGraph":
+				case "clear":
 				case "getVertexCount":
 				case "getEdgeCount":
-				case "getGraphVertex":
-				case "addGraphVertex":
-				case "removeGraphVertex":
-				case "removeGraphEdge":
+				case "getVertex":
+				case "addVertex":
+				case "removeVertex":
+				case "removeEdge":
 					if (!proxy.getGraph()) {
 						proxy.reinitializeGraph()
 					}
@@ -40,15 +40,17 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			}
 			//transaction commit manager
 			switch (m.getName()) {
-				case "addGraphVertex":
-				case "addGraphEdge":
-				case "removeGraphVertex":
-				case "removeGraphEdge":
+				case "addVertex":
+				case "addEdge":
+				case "removeVertex":
+				case "removeEdge":
 				case "setElementProperty":
 					CommitManager cm = proxy.getCommitManager()
-					cm.incrCounter()
-					if (cm.atCommit()) {
-						println "committing mutations to graph..."
+					if (cm) { // if mutation is part of a managed transaction
+						cm.incrCounter()
+						if (cm.atCommit()) {
+							println "committing mutations to graph..."
+						}
 					}
 					break
 				case "beginManagedTransaction":
@@ -71,6 +73,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			result = m.invoke(obj, args)
 
 		} catch (InvocationTargetException e) {
+			//TODO: handle transaction rollback
 			throw e.getTargetException()
 		} catch (Exception e) {
 			throw new RuntimeException("unexpected invocation exception: " +

@@ -64,7 +64,6 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	void initializeGraph_OrientGraph(String url) {
-		//OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(false);
 		OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
 
 		//disable all caches
@@ -86,7 +85,7 @@ class GraphDbOperator implements GraphInterface {
 		}
 	}
 
-	void shutdownGraph() {
+	void shutdown() {
 		if (g) {
 			if (!readOnly) {
 				graphWriteConnectionLocks[graphUrl].release()
@@ -146,7 +145,7 @@ class GraphDbOperator implements GraphInterface {
 		}
 	}
 
-	void clearGraph() {
+	void clear() {
 		g.clear()
 		//reinstate vertex and edge indices
 		g.createAutomaticIndex(Index.VERTICES, Vertex.class, null)
@@ -184,7 +183,8 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	List getNeighbors(Vertex v, String idProp, String alongEdge) {
-		//idProp can be 'upc' or 'categoryId'
+		//idProp is the property of the result vertices that will be returned
+		//if null, then the vertices themselves will be returned
 		List neighbors = []
 		List tempList = []
 		if (idProp) {
@@ -234,7 +234,7 @@ class GraphDbOperator implements GraphInterface {
 		return key
 	}
 
-	Vertex getGraphVertex(String property, String value) {
+	Vertex getVertex(String property, String value) {
 		AutomaticIndex vertexIndex = g.getIndex(Index.VERTICES, Vertex.class)
 		Iterable<Vertex> itr = vertexIndex.get(property, value)
 		Vertex vertex
@@ -245,30 +245,30 @@ class GraphDbOperator implements GraphInterface {
 		return vertex
 	}
 	
-	Vertex addGraphVertex(Object id) {
+	Vertex addVertex(Object id) {
 		return g.addVertex(id)
 	}
 
-	void removeGraphVertex(Vertex vv) {
+	void removeVertex(Vertex vv) {
 		g.removeVertex(vv)
 	}
 
-	void removeGraphEdge(Edge ee) {
+	void removeEdge(Edge ee) {
 		g.removeEdge(ee)
 	}
 
-	Edge getGraphEdge(Vertex v1, Vertex v2, String edgeLabel) {
-		//return getGraphEdge_Indexed(v1, v2, edgeLabel)
-		//return getGraphEdge_NonIndexed(v1, v2, edgeLabel)
-		return getGraphEdge_OrientGraph(v1, v2, edgeLabel)
+	Edge getEdge(Vertex v1, Vertex v2, String edgeLabel) {
+		//return getEdge_Indexed(v1, v2, edgeLabel)
+		//return getEdge_NonIndexed(v1, v2, edgeLabel)
+		return getEdge_OrientGraph(v1, v2, edgeLabel)
 	}
 
-	Edge addGraphEdge(Vertex v1, Vertex v2, String edgeLabel) {
-		//return addGraphEdge_Indexed(v1, v2, edgeLabel)
-		return addGraphEdge_NonIndexed(v1, v2, edgeLabel)
+	Edge addEdge(Vertex v1, Vertex v2, String edgeLabel) {
+		//return addEdge_Indexed(v1, v2, edgeLabel)
+		return addEdge_NonIndexed(v1, v2, edgeLabel)
 	}
 	
-	Edge getGraphEdge_Indexed(Vertex v1, Vertex v2, String edgeLabel) {
+	Edge getEdge_Indexed(Vertex v1, Vertex v2, String edgeLabel) {
 		Edge edge
 		Iterable<Edge> itr
 		AutomaticIndex edgeIndex = g.getIndex(Index.EDGES, Edge.class)
@@ -280,7 +280,7 @@ class GraphDbOperator implements GraphInterface {
 		return edge
 	}
 
-	Edge getGraphEdge_NonIndexed(Vertex v1, Vertex v2, String edgeLabel) {
+	Edge getEdge_NonIndexed(Vertex v1, Vertex v2, String edgeLabel) {
 		def edges = []
 		if (edgeLabel) {
 			if (v1.id.equals(v2)) {
@@ -305,7 +305,7 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	// use raw API to do a faster edge retrieval
-	Edge getGraphEdge_OrientGraph(Vertex v1, Vertex v2, String edgeLabel) {
+	Edge getEdge_OrientGraph(Vertex v1, Vertex v2, String edgeLabel) {
 		//println ("dbg: v1 id = ${v1.id.toString()}, v2 id = ${v2.id.toString()}")
 		//String v1id = v1.id.toString().substring(1)
 		//String v2id = v2.id.toString().substring(1)
@@ -331,9 +331,9 @@ class GraphDbOperator implements GraphInterface {
 		return edge
 	}
 
-	Edge addGraphEdge_Indexed(Vertex v1, Vertex v2, String edgeLabel) {
+	Edge addEdge_Indexed(Vertex v1, Vertex v2, String edgeLabel) {
 		Edge edge
-		if (!getGraphEdge(v1, v2, edgeLabel)) {
+		if (!getEdge(v1, v2, edgeLabel)) {
 			edge = g.addEdge(null, v1, v2, edgeLabel)
 			edge.setProperty('edgeId', getUniqueEdgeIdentifier(v1, v2, edgeLabel))
 		}
@@ -341,7 +341,7 @@ class GraphDbOperator implements GraphInterface {
 		return edge
 	}
 
-	Edge addGraphEdge_NonIndexed(Vertex v1, Vertex v2, String edgeLabel) {
+	Edge addEdge_NonIndexed(Vertex v1, Vertex v2, String edgeLabel) {
 		return g.addEdge(null, v1, v2, edgeLabel)
 	}
 
