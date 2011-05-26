@@ -1,3 +1,4 @@
+package com.pilot
 
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
@@ -224,16 +225,6 @@ class GraphDbOperator implements GraphInterface {
 		return neighbors
 	}
 
-	//This method currently assumes that only 1 edge with a particular label
-	//exists between two nodes
-	String getUniqueEdgeIdentifier(Vertex v1, Vertex v2, String edgeLabel) {
-		String s1 = v1.id.toString()
-		String s2 = v2.id.toString()
-		String key = (s1.compareTo(s2) < 0) ? (s1 + '-' + s2) : (s2 + '-' + s1)
-		key += '(' + edgeLabel + ')'
-		return key
-	}
-
 	Vertex getVertex(String property, String value) {
 		AutomaticIndex vertexIndex = g.getIndex(Index.VERTICES, Vertex.class)
 		Iterable<Vertex> itr = vertexIndex.get(property, value)
@@ -245,8 +236,8 @@ class GraphDbOperator implements GraphInterface {
 		return vertex
 	}
 	
-	Vertex addVertex(Object id) {
-		return g.addVertex(id)
+	Vertex addVertex() {
+		return g.addVertex(null)
 	}
 
 	void removeVertex(Vertex vv) {
@@ -258,28 +249,14 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	Edge getEdge(Vertex v1, Vertex v2, String edgeLabel) {
-		//return getEdge_Indexed(v1, v2, edgeLabel)
 		//return getEdge_NonIndexed(v1, v2, edgeLabel)
 		return getEdge_OrientGraph(v1, v2, edgeLabel)
 	}
 
 	Edge addEdge(Vertex v1, Vertex v2, String edgeLabel) {
-		//return addEdge_Indexed(v1, v2, edgeLabel)
 		return addEdge_NonIndexed(v1, v2, edgeLabel)
 	}
 	
-	Edge getEdge_Indexed(Vertex v1, Vertex v2, String edgeLabel) {
-		Edge edge
-		Iterable<Edge> itr
-		AutomaticIndex edgeIndex = g.getIndex(Index.EDGES, Edge.class)
-		itr = edgeIndex.get('edgeId', getUniqueEdgeIdentifier(v1, v2, edgeLabel))
-		if (itr) {
-			edge = itr.next()
-		}
-
-		return edge
-	}
-
 	Edge getEdge_NonIndexed(Vertex v1, Vertex v2, String edgeLabel) {
 		def edges = []
 		if (edgeLabel) {
@@ -306,38 +283,12 @@ class GraphDbOperator implements GraphInterface {
 
 	// use raw API to do a faster edge retrieval
 	Edge getEdge_OrientGraph(Vertex v1, Vertex v2, String edgeLabel) {
-		//println ("dbg: v1 id = ${v1.id.toString()}, v2 id = ${v2.id.toString()}")
-		//String v1id = v1.id.toString().substring(1)
-		//String v2id = v2.id.toString().substring(1)
-		//println ("dbg: v1 id = ${v1id}, v2 id = ${v2id}")
-		//ODocument vertex1 = ographdb.query(new OSQLSynchQuery("select from OGraphVertex where RecordID = " + v1id))
-		//ODocument vertex2 = ographdb.query(new OSQLSynchQuery("select from OGraphVertex where RecordID = " + v2id))
-		//ODocument vertex1 = ographdb.query(new OSQLSynchQuery("select from [" + v1id + "]"))
-		//ODocument vertex2 = ographdb.query(new OSQLSynchQuery("select from [" + v2id + "]"))
-		//if (!vertex1 || !vertex2) {
-		//	println ("dbg: Orient Vertex not found!!!!")
-		//}
-		//println(" Vertex upc is ${vertex1.field("upc")}")
-		//println(" Vertex categoryId is ${vertex1.field("categoryId")}")
-		//Vertex myv1 = new OrientVertex(g, vertex1)
-		//println("dbg: Vertex id is ${myv1.id}")
-
 		OGraphDatabase ographdb = g.getRawGraph()
 		Set<ODocument> edges = ographdb.getEdgesBetweenVertexes(v1.getRawElement(), v2.getRawElement(), (String[])[edgeLabel])
 		Edge edge
 		if (edges) {
 			edge = new OrientEdge(g, edges.iterator().next())
 		}
-		return edge
-	}
-
-	Edge addEdge_Indexed(Vertex v1, Vertex v2, String edgeLabel) {
-		Edge edge
-		if (!getEdge(v1, v2, edgeLabel)) {
-			edge = g.addEdge(null, v1, v2, edgeLabel)
-			edge.setProperty('edgeId', getUniqueEdgeIdentifier(v1, v2, edgeLabel))
-		}
-
 		return edge
 	}
 
@@ -352,16 +303,5 @@ class GraphDbOperator implements GraphInterface {
 	Object getElementProperty(Element elem, String property) {
 		return elem.getProperty(property)
 	}
-
-	/*void startTransaction() {
-		g.setTransactionMode(TransactionalGraph.Mode.MANUAL)
-		g.startTransaction()
-	}
-
-	void stopTransaction(TransactionalGraph.Conclusion conclusion) {
-		g.stopTransaction(conclusion)
-		g.setTransactionMode(TransactionalGraph.Mode.AUTOMATIC)
-	}
-	*/
 
 }
