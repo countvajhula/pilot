@@ -16,5 +16,36 @@ Currently, the only graph database provider supported is "OrientDB":http://www.o
 ** DFS
 ** BFS
 
-Documentation is on the way! The API is represented in GraphInterface.groovy, so for now, looking at that file should give an idea of its use.
+
+Example use:
+
+To initialize a graph:
+GraphInterface myGraph = GraphManagerProxy.newInstance(new GraphDbOperator('/Users/sid/graph/mygraphdb1', GraphInterface.GraphProvider.ORIENTDB, true)) //the read-only flag will be removed in a future version
+
+After this, all operations defined in GraphInterface.groovy can be used by calling the methods on this GraphInterface instance (API is similar to the Blueprints Graph interface API):
+Vertex v1 = myGraph.addVertex()
+myGraph.setElementProperty(v1, 'name', 'Sid')
+Vertex v2 = myGraph.addVertex()
+myGraph.setElementProperty(v2, 'name', 'Dan')
+Edge ee1 = myGraph.addEdge(v1, v2, 'friends')
+myGraph.setElementProperty(ee1, 'since', 2007)
+
+// retrieves the edge between v1 and v2
+Edge ee2 = myGraph.getEdge(v1, v2, 'friends')
+
+Transactions:
+myGraph.beginManagedTransaction()
+
+//...
+// as many graph operations/mutations as you like
+//...
+
+myGraph.concludeManagedTransaction()
+
+
+//get list of friends by name
+myGraph.getNeighbors(v1, 'friends', 'name')
+
+
+More documentation is on the way! For now, looking at GraphInterface.groovy would be a way to get familiar with the API.
 

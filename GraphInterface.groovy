@@ -23,14 +23,14 @@ public interface GraphInterface {
 	public static int MASSIVEINSERT_MUTATIONS_BEFORE_COMMIT = 10000
 
 	void initializeGraph(String url, GraphProvider graphProvider, boolean readOnly);
-	void reinitializeGraph();
+	void reinitializeGraph(); //internal
 	void shutdown();
 	Graph getGraph();
 	String getGraphUrl();
 	void beginManagedTransaction();
 	void beginManagedTransaction(int numMutations);
 	void concludeManagedTransaction();
-	CommitManager getCommitManager();
+	CommitManager getCommitManager(); //internal
 	void declareIntent(MutationIntent intent);
 	void clear();
 	List getVertices(String idProp);
