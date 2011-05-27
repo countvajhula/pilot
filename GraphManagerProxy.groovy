@@ -8,6 +8,9 @@ import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager
 import java.util.concurrent.Semaphore
 
 
+/** Transparently manages transactions and multithreading by intercepting
+ * all calls to the graph.
+*/
 public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	private Object obj
 	private static Map graphWriteLocks = [:]

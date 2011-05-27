@@ -17,6 +17,8 @@ import com.orientechnologies.orient.core.config.*
 import java.util.concurrent.Semaphore
 
 
+/** Implements high-level graph operations that may be used by the application.
+*/
 class GraphDbOperator implements GraphInterface {
 
 	static {

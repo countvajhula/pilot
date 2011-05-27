@@ -7,6 +7,8 @@ import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager
 import com.tinkerpop.gremlin.*
 
 
+/** Captures all the graph operations provided by Pilot
+*/
 public interface GraphInterface {
 
 	public static enum GraphProvider {
