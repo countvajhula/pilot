@@ -8,7 +8,7 @@ import com.tinkerpop.gremlin.*
 
 
 /** Captures all the graph operations provided by Pilot
-*/
+ */
 public interface GraphInterface {
 
 	public static enum GraphProvider {
@@ -30,6 +30,7 @@ public interface GraphInterface {
 	void beginManagedTransaction();
 	void beginManagedTransaction(int numMutations);
 	void concludeManagedTransaction();
+	void interruptManagedTransaction();
 	CommitManager getCommitManager(); //internal
 	void declareIntent(MutationIntent intent);
 	void clear();

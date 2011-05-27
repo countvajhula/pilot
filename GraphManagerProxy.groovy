@@ -10,7 +10,7 @@ import java.util.concurrent.Semaphore
 
 /** Transparently manages transactions and multithreading by intercepting
  * all calls to the graph.
-*/
+ */
 public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	private Object obj
 	private static Map graphWriteLocks = [:]
@@ -77,11 +77,22 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			result = m.invoke(obj, args)
 
 		} catch (InvocationTargetException e) {
-			//TODO: handle transaction rollback
-			throw e.getTargetException()
+			println "encountered Exception: ${e.toString()}"
+			CommitManager cm = proxy.getCommitManager()
+			if (cm) {
+				proxy.interruptManagedTransaction()
+			} else {
+				throw e.getTargetException()
+			}
 		} catch (Exception e) {
-			throw new RuntimeException("unexpected invocation exception: " +
-					e.getMessage())
+			println "encountered Exception: ${e.toString()}"
+			CommitManager cm = proxy.getCommitManager()
+			if (cm) {
+				proxy.interruptManagedTransaction()
+			} else {
+				throw new RuntimeException("unexpected invocation exception: " +
+						e.getMessage())
+			}
 		} finally {
 
 			switch (m.getName()) {

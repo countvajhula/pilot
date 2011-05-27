@@ -18,7 +18,7 @@ import java.util.concurrent.Semaphore
 
 
 /** Implements high-level graph operations that may be used by the application.
-*/
+ */
 class GraphDbOperator implements GraphInterface {
 
 	static {
@@ -127,6 +127,12 @@ class GraphDbOperator implements GraphInterface {
 		commitManager.close()
 		commitManager = null
 		println "managed transaction concluded."
+	}
+
+	void interruptManagedTransaction() {
+		println "transaction interrupted. resuming..."
+		g.stopTransaction(TransactionalGraph.Conclusion.FAILURE)
+		g.startTransaction()
 	}
 
 	CommitManager getCommitManager() {
