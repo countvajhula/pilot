@@ -81,18 +81,20 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			CommitManager cm = proxy.getCommitManager()
 			if (cm) {
 				proxy.interruptManagedTransaction()
-			} else {
-				throw e.getTargetException()
 			}
+
+			throw e.getTargetException()
+
 		} catch (Exception e) {
 			println "encountered Exception: ${e.toString()}"
 			CommitManager cm = proxy.getCommitManager()
 			if (cm) {
 				proxy.interruptManagedTransaction()
-			} else {
-				throw new RuntimeException("unexpected invocation exception: " +
-						e.getMessage())
 			}
+
+			throw new RuntimeException("unexpected invocation exception: " +
+					e.getMessage())
+
 		} finally {
 
 			switch (m.getName()) {
