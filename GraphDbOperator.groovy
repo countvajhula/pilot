@@ -125,7 +125,12 @@ class GraphDbOperator implements GraphInterface {
 
 	void concludeManagedTransaction() {
 		if (commitManager) {
-			commitManager.close()
+			try {
+				commitManager.close()
+			} catch (Exception e) {
+				interruptManagedTransaction()
+				commitManager.close()
+			}
 			commitManager = null
 			println "managed transaction concluded."
 		} else {
