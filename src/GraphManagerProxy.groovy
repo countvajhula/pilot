@@ -15,7 +15,19 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	private Object obj
 	private static Map graphWriteLocks = [:]
 	
-	public static Object newInstance(Object obj) {
+	public static Object newInstance(String url, GraphInterface.GraphProvider provider, boolean readOnly) throws Exception {
+		Object obj
+		switch (provider) {
+			case GraphInterface.GraphProvider.ORIENTDB:
+				obj = new OrientDbOperator(url, readOnly)
+				break
+			//case GraphInterface.GraphProvider.NEO4J:
+				//obj = new Neo4jOperator(url, readOnly)
+				//break
+			default:
+				throw new Exception("Graph provider invalid or not supported!")
+		}
+
 		return java.lang.reflect.Proxy.newProxyInstance(
 				obj.getClass().getClassLoader(),
 				obj.getClass().getInterfaces(),

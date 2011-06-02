@@ -12,7 +12,8 @@ import com.tinkerpop.gremlin.*
 public interface GraphInterface {
 
 	public static enum GraphProvider {
-		ORIENTDB; //can add others in future, like neo4j
+		ORIENTDB,
+		NEO4J; //can add others in future
 	}
 
 	public static enum MutationIntent {
@@ -22,7 +23,7 @@ public interface GraphInterface {
 	public static int DEFAULT_MUTATIONS_BEFORE_COMMIT = 1000
 	public static int MASSIVEINSERT_MUTATIONS_BEFORE_COMMIT = 10000
 
-	void initializeGraph(String url, GraphProvider graphProvider, boolean readOnly);
+	void initializeGraph(String url, boolean readOnly);
 	void reinitializeGraph(); //internal
 	void shutdown();
 	Graph getGraph();

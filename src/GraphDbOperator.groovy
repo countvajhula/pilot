@@ -2,18 +2,9 @@ package com.pilot
 
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
-import com.tinkerpop.blueprints.pgm.impls.orientdb.*
 import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper
 import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager
 import com.tinkerpop.gremlin.*
-import com.orientechnologies.common.collection.*
-import com.orientechnologies.common.*
-import com.orientechnologies.orient.core.*
-import com.orientechnologies.orient.core.db.graph.*
-import com.orientechnologies.orient.core.record.impl.*
-import com.orientechnologies.orient.core.sql.query.*
-import com.orientechnologies.orient.core.intent.*
-import com.orientechnologies.orient.core.config.*
 import java.util.concurrent.Semaphore
 
 
@@ -25,64 +16,44 @@ class GraphDbOperator implements GraphInterface {
 		Gremlin.load()
 	}
 
-	public static final String ORIENTDB_STORAGE_MODE = "local"
-
-	private Graph g
-	private String graphUrl
-	private GraphInterface.GraphProvider graphProvider
-	private CommitManager commitManager
-	private numMutationsBeforeCommit
-	private static Map graphWriteConnectionLocks = [:]
-	private boolean readOnly
+	protected Graph g
+	protected String graphUrl
+	protected CommitManager commitManager //can be private?
+	protected numMutationsBeforeCommit
+	protected static Map graphWriteConnectionLocks = [:] //can be private?
+	protected boolean readOnly //can be private?
 	
 	//TODO:
 	//FOAF, with degree as input
 	//BFS, DFS (iterators)
 
-	public GraphDbOperator(String url, GraphInterface.GraphProvider graphProvider, boolean readOnly) {
+	public GraphDbOperator(String url, boolean readOnly) {
 		Semaphore graphWriteConnectionLock
 		graphWriteConnectionLock = graphWriteConnectionLocks[url]
 		if (!graphWriteConnectionLock) {
 			graphWriteConnectionLock = new Semaphore(1, true)
 			graphWriteConnectionLocks[url] = graphWriteConnectionLock
 		}
-		initializeGraph(url, graphProvider, readOnly)
 		numMutationsBeforeCommit = GraphInterface.DEFAULT_MUTATIONS_BEFORE_COMMIT
 	}
 
 	//change to return status
 	//TODO: remove readOnly flag in future when pessimistic locking is supported by underlying db
-	void initializeGraph(String url, GraphInterface.GraphProvider graphProvider, boolean readOnly) {
+	void initializeGraph(String url, boolean readOnly) {
 		this.readOnly = readOnly
 		if (!readOnly) {
 			graphWriteConnectionLocks[url].acquire()
 			println "-ACQUIRED- GRAPH WRITE CONNECTION [${url}]"
 		}
 		graphUrl = url
-		this.graphProvider = graphProvider
-		if (graphProvider == GraphInterface.GraphProvider.ORIENTDB) {
-			initializeGraph_OrientGraph(url)
-		}
-		println "Graph db initialized."
-	}
-
-	void initializeGraph_OrientGraph(String url) {
-		OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
-
-		//disable all caches
-		//OGlobalConfiguration.STORAGE_CACHE_SIZE.setValue(0);
-		//OGlobalConfiguration.DB_USE_CACHE.setValue(false);
-		//OGlobalConfiguration.DB_CACHE_SIZE.setValue(0);
-
-		g = new OrientGraph(ORIENTDB_STORAGE_MODE + ":" + url)
 	}
 
 	void reinitializeGraph() {
-		if (graphUrl && graphProvider) {
+		if (graphUrl) {
 			if (!readOnly) {
 				graphWriteConnectionLocks[graphUrl].release()
 			}
-			initializeGraph(graphUrl, graphProvider, readOnly)
+			initializeGraph(graphUrl, readOnly)
 		} else {
 			println "db URL or provider not found!"
 		}
@@ -152,15 +123,7 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	void declareIntent(GraphInterface.MutationIntent intent) {
-		switch (intent) {
-			case GraphInterface.MutationIntent.MASSIVEINSERT:
-				g.getRawGraph().declareIntent(new OIntentMassiveInsert())
-				numMutationsBeforeCommit = GraphInterface.MASSIVEINSERT_MUTATIONS_BEFORE_COMMIT
-				break
-			case null:
-				g.getRawGraph().declareIntent(null)
-				numMutationsBeforeCommit = GraphInterface.DEFAULT_MUTATIONS_BEFORE_COMMIT
-		}
+		//implementation will be provider-specific?
 	}
 
 	void clear() {
@@ -266,15 +229,6 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	Edge getEdge(Vertex v1, Vertex v2, String edgeLabel) {
-		//return getEdge_NonIndexed(v1, v2, edgeLabel)
-		return getEdge_OrientGraph(v1, v2, edgeLabel)
-	}
-
-	Edge addEdge(Vertex v1, Vertex v2, String edgeLabel) {
-		return addEdge_NonIndexed(v1, v2, edgeLabel)
-	}
-	
-	Edge getEdge_NonIndexed(Vertex v1, Vertex v2, String edgeLabel) {
 		def edges = []
 		if (edgeLabel) {
 			if (v1.id.equals(v2)) {
@@ -298,18 +252,7 @@ class GraphDbOperator implements GraphInterface {
 		return null
 	}
 
-	// use raw API to do a faster edge retrieval
-	Edge getEdge_OrientGraph(Vertex v1, Vertex v2, String edgeLabel) {
-		OGraphDatabase ographdb = g.getRawGraph()
-		Set<ODocument> edges = ographdb.getEdgesBetweenVertexes(v1.getRawElement(), v2.getRawElement(), (String[])[edgeLabel])
-		Edge edge
-		if (edges) {
-			edge = new OrientEdge(g, edges.iterator().next())
-		}
-		return edge
-	}
-
-	Edge addEdge_NonIndexed(Vertex v1, Vertex v2, String edgeLabel) {
+	Edge addEdge(Vertex v1, Vertex v2, String edgeLabel) {
 		return g.addEdge(null, v1, v2, edgeLabel)
 	}
 
