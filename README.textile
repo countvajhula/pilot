@@ -24,11 +24,11 @@ To use Pilot in your project, simply drop the JAR into your project or system cl
 
 h1. Examples
 
-h2. Initializing a graph
+h3. Initializing a graph
 
 GraphInterface myGraph = GraphManagerProxy.newInstance('/Users/sid/graph/mygraphdb1', GraphInterface.GraphProvider.ORIENTDB, true) //the read-only flag will be removed in a future version
 
-h2. Miscellaneous operations
+h3. Miscellaneous operations
 
 After initializing the graph, all operations defined in GraphInterface.groovy can be used by calling the methods on this GraphInterface instance (API is similar to the Blueprints Graph interface API):
 Vertex v1 = myGraph.addVertex()
@@ -44,7 +44,7 @@ Edge ee2 = myGraph.getEdge(v1, v2, 'friends')
 // get list of friends by name
 myGraph.getNeighbors(v1, 'friends', 'name')
 
-h2. Transactions
+h3. Transactions
 
 myGraph.beginManagedTransaction()
 
