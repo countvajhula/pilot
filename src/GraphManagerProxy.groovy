@@ -21,9 +21,9 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			case GraphInterface.GraphProvider.ORIENTDB:
 				obj = new OrientDbOperator(url, readOnly)
 				break
-			//case GraphInterface.GraphProvider.NEO4J:
-				//obj = new Neo4jOperator(url, readOnly)
-				//break
+			case GraphInterface.GraphProvider.NEO4J:
+				obj = new Neo4jOperator(url, readOnly)
+				break
 			default:
 				throw new Exception("Graph provider invalid or not supported!")
 		}
