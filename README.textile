@@ -26,6 +26,14 @@ h1. Using Pilot
 
 To use Pilot in your project, simply drop the JAR into your project or system classpath.
 
+To create the JAR from source:
+# Clone the repository on your machine
+# Go to the folder /src which contains the Pilot Groovy source files
+# Type 'groovyc *.groovy' -- this will create a directory structure com/pilot in the current directory
+# Now type 'jar -cf pilot.jar com/pilot/*.class' -- this will create the file 'pilot.jar' in the current directory
+# Copy this JAR into a system classpath location
+# Now you can use Pilot in your project by adding the import 'import com.pilot.*'
+
 h1. Examples
 
 h3. Initializing a graph
