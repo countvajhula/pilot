@@ -34,3 +34,6 @@ profile
 
 # db dump
 *dump
+
+# maven build output
+target
