@@ -26,7 +26,13 @@ h1. Using Pilot
 
 To use Pilot in your project, simply drop the JAR into your project or system classpath.
 
-To create the JAR from source:
+To build the JAR using "Maven":http://maven.apache.org (recommended):
+# Clone the repository on your machine
+# In the root folder, type 'mvn clean install'
+# Once the build completes, copy the JAR file in the target/ folder into your system or project classpath location
+# You can now use Pilot in your project by adding the import 'import com.pilot.*'
+
+To create the JAR manually from source (you will need to have the dependencies -- Blueprints, Neo4j, OrientDB, Gremlin -- already present in your system classpath):
 # Clone the repository on your machine
 # Go to the folder /src which contains the Pilot Groovy source files
 # Type 'groovyc *.groovy' -- this will create a directory structure com/pilot in the current directory
