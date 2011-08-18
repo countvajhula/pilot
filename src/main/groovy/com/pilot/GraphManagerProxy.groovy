@@ -6,6 +6,8 @@ import com.tinkerpop.blueprints.pgm.*
 import com.tinkerpop.blueprints.pgm.impls.orientdb.*
 import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager
 import java.util.concurrent.Semaphore
+import java.io.StringWriter
+import java.io.PrintWriter
 
 
 /** Transparently manages transactions and multithreading by intercepting
@@ -90,6 +92,11 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 		} catch (InvocationTargetException e) {
 			println "encountered Exception: ${e.toString()}"
+			//for debugging:
+			//StringWriter sw = new StringWriter()
+			//PrintWriter pw = new PrintWriter(sw)
+			//e.printStackTrace(pw)
+			//println "encountered Exception: ${sw.toString()}"
 			CommitManager cm = proxy.getCommitManager()
 			if (cm) {
 				proxy.interruptManagedTransaction()
@@ -99,6 +106,11 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 		} catch (Exception e) {
 			println "encountered Exception: ${e.toString()}"
+			//for debugging:
+			//StringWriter sw = new StringWriter()
+			//PrintWriter pw = new PrintWriter(sw)
+			//e.printStackTrace(pw)
+			//println "encountered Exception: ${sw.toString()}"
 			CommitManager cm = proxy.getCommitManager()
 			if (cm) {
 				proxy.interruptManagedTransaction()

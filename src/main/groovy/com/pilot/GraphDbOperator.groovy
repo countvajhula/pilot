@@ -127,10 +127,19 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	void clear() {
+		TransactionalGraph.Mode transactionMode = g.getTransactionMode()
+
 		g.clear()
 		//reinstate vertex and edge indices
-		g.createAutomaticIndex(Index.VERTICES, Vertex.class, null)
-		g.createAutomaticIndex(Index.EDGES, Edge.class, null)
+		try {
+			g.createAutomaticIndex(Index.VERTICES, Vertex.class, null)
+			g.createAutomaticIndex(Index.EDGES, Edge.class, null)
+		} catch (Exception e) {
+			println "warning: encountered Exception: ${e.toString()}; continuing..."
+		}
+
+		//revert transaction mode to what it was prior to the call to clear()
+		g.setTransactionMode(transactionMode)
 	}
 
 	List getVertices(String idProp) {
