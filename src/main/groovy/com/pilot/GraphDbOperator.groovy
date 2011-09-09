@@ -127,9 +127,17 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	void clear() {
-		TransactionalGraph.Mode transactionMode = g.getTransactionMode()
+
+		boolean transactionInProgress = false
+
+		if (commitManager) {
+			//transaction in progress -- kill it
+			concludeManagedTransaction()
+			transactionInProgress = true
+		}
 
 		g.clear()
+
 		//reinstate vertex and edge indices
 		try {
 			g.createAutomaticIndex(Index.VERTICES, Vertex.class, null)
@@ -138,8 +146,10 @@ class GraphDbOperator implements GraphInterface {
 			println "warning: encountered Exception: ${e.toString()}; continuing..."
 		}
 
-		//revert transaction mode to what it was prior to the call to clear()
-		g.setTransactionMode(transactionMode)
+		//resume the transaction if one was in progress prior to call to clear()
+		if (transactionInProgress) {
+			beginManagedTransaction()
+		}
 	}
 
 	List getVertices(String idProp) {
