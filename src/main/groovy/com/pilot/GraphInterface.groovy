@@ -3,7 +3,6 @@ package com.pilot
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
 import com.tinkerpop.blueprints.pgm.impls.orientdb.*
-import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager
 import com.tinkerpop.gremlin.*
 
 
@@ -32,7 +31,9 @@ public interface GraphInterface {
 	void beginManagedTransaction(int numMutations);
 	void concludeManagedTransaction();
 	void interruptManagedTransaction();
-	CommitManager getCommitManager(); //internal
+	boolean isTransactionInProgress(); //internal
+	int getTransactionBufferSize_current(); //internal
+	int getTransactionBufferSize_max(); //internal
 	void declareIntent(MutationIntent intent);
 	void clear();
 	List getVertices(String idProp);

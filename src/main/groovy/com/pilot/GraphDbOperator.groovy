@@ -2,8 +2,6 @@ package com.pilot
 
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
-import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper
-import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager
 import com.tinkerpop.gremlin.*
 import java.util.concurrent.Semaphore
 
@@ -18,8 +16,8 @@ class GraphDbOperator implements GraphInterface {
 
 	protected Graph g
 	protected String graphUrl
-	protected CommitManager commitManager //can be private?
-	protected numMutationsBeforeCommit
+	protected boolean transactionInProgress
+	protected int numMutationsBeforeCommit
 	protected static Map graphWriteConnectionLocks = [:] //can be private?
 	protected boolean readOnly //can be private?
 	
@@ -35,6 +33,7 @@ class GraphDbOperator implements GraphInterface {
 			graphWriteConnectionLocks[url] = graphWriteConnectionLock
 		}
 		numMutationsBeforeCommit = GraphInterface.DEFAULT_MUTATIONS_BEFORE_COMMIT
+		transactionInProgress = false
 	}
 
 	//change to return status
@@ -83,26 +82,29 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	void beginManagedTransaction(int numMutations) {
-		if (commitManager) {
+		if (transactionInProgress) {
 			println "Transaction already in progress!!"
 			return
 		}
 		if (!numMutations) {
 			numMutations = numMutationsBeforeCommit
 		}
-		commitManager = TransactionalGraphHelper.createCommitManager(g, numMutations);
+		g.setMaxBufferSize(numMutations)
+		transactionInProgress = true
+
 		println "managed transaction begun..."
 	}
 
 	void concludeManagedTransaction() {
-		if (commitManager) {
+		if (transactionInProgress) {
 			try {
-				commitManager.close()
+				g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
 			} catch (Exception e) {
 				interruptManagedTransaction()
-				commitManager.close()
+				g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
 			}
-			commitManager = null
+			g.setMaxBufferSize(0)
+			transactionInProgress = false
 			println "managed transaction concluded."
 		} else {
 			println "no managed transaction in progress!"
@@ -112,14 +114,19 @@ class GraphDbOperator implements GraphInterface {
 	void interruptManagedTransaction() {
 		println "transaction interrupted. resuming..."
 		g.stopTransaction(TransactionalGraph.Conclusion.FAILURE)
-		g.startTransaction()
+		//g.startTransaction()
 	}
 
-	CommitManager getCommitManager() {
-		if (!commitManager) {
-			println "No transaction in progress!!"
-		}
-		return commitManager
+	boolean isTransactionInProgress() {
+		return transactionInProgress
+	}
+
+	int getTransactionBufferSize_current() {
+		return g.getCurrentBufferSize()
+	}
+
+	int getTransactionBufferSize_max() {
+		return numMutationsBeforeCommit
 	}
 
 	void declareIntent(GraphInterface.MutationIntent intent) {
@@ -128,12 +135,14 @@ class GraphDbOperator implements GraphInterface {
 
 	void clear() {
 
-		boolean transactionInProgress = false
+		boolean activeTransaction = false
 
-		if (commitManager) {
+		//TODO: this transaction code may not be necessary depending on the behavior
+		//of clear() wrt transaction buffer -- check via testcase
+		if (transactionInProgress) {
 			//transaction in progress -- kill it
 			concludeManagedTransaction()
-			transactionInProgress = true
+			activeTransaction = true
 		}
 
 		g.clear()
@@ -147,7 +156,7 @@ class GraphDbOperator implements GraphInterface {
 		}
 
 		//resume the transaction if one was in progress prior to call to clear()
-		if (transactionInProgress) {
+		if (activeTransaction) {
 			beginManagedTransaction()
 		}
 	}

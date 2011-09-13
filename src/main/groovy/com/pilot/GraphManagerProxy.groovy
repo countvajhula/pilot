@@ -4,7 +4,6 @@ import java.lang.reflect.*
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
 import com.tinkerpop.blueprints.pgm.impls.orientdb.*
-import com.tinkerpop.blueprints.pgm.util.TransactionalGraphHelper.CommitManager
 import java.util.concurrent.Semaphore
 import java.io.StringWriter
 import java.io.PrintWriter
@@ -63,13 +62,12 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 				case "removeVertex":
 				case "removeEdge":
 				case "setElementProperty":
-					CommitManager cm = proxy.getCommitManager()
-					if (cm) { // if mutation is part of a managed transaction
-						cm.incrCounter()
-						if (cm.atCommit()) {
+					if (proxy.isTransactionInProgress()) {
+						if((proxy.getTransactionBufferSize_current()-1) % proxy.getTransactionBufferSize_max() == 0) {
 							println "committing mutations to graph..."
 						}
 					}
+
 					break
 				case "beginManagedTransaction":
 					//graph write locking
@@ -97,8 +95,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			//PrintWriter pw = new PrintWriter(sw)
 			//e.printStackTrace(pw)
 			//println "encountered Exception: ${sw.toString()}"
-			CommitManager cm = proxy.getCommitManager()
-			if (cm) {
+
+			if (proxy.isTransactionInProgress()) {
 				proxy.interruptManagedTransaction()
 			}
 
@@ -111,8 +109,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			//PrintWriter pw = new PrintWriter(sw)
 			//e.printStackTrace(pw)
 			//println "encountered Exception: ${sw.toString()}"
-			CommitManager cm = proxy.getCommitManager()
-			if (cm) {
+
+			if (proxy.isTransactionInProgress()) {
 				proxy.interruptManagedTransaction()
 			}
 
