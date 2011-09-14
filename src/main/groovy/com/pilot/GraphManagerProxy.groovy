@@ -14,7 +14,12 @@ import java.io.PrintWriter
  */
 public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	private Object obj
+	private boolean profilingEnabled
+	private Map functionProfile
 	private static Map graphWriteLocks = [:]
+	private static Map managerProxyForGraphOperator = [:]
+
+	private static int MS_IN_NS = 1000000
 	
 	public static Object newInstance(String url, GraphInterface.GraphProvider provider, boolean readOnly) throws Exception {
 		Object obj
@@ -29,19 +34,34 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 				throw new Exception("Graph provider invalid or not supported!")
 		}
 
+		GraphManagerProxy managerProxy = new GraphManagerProxy(obj)
+		managerProxyForGraphOperator[obj] = managerProxy
+
 		return java.lang.reflect.Proxy.newProxyInstance(
 				obj.getClass().getClassLoader(),
 				obj.getClass().getInterfaces(),
-				new GraphManagerProxy(obj))
+				managerProxy)
 	}
 
 	private GraphManagerProxy(Object obj) {
 		this.obj = obj;
 	}
 
+	//shouldn't have to ever call this
+	public static GraphManagerProxy getManagerProxyForOperator(GraphDbOperator operator) {
+		return managerProxyForGraphOperator[operator]
+	}
+
 	public Object invoke(Object proxy, Method m, Object[] args) throws Throwable {
+
 		Object result
+		long startTime, finishTime
+
 		try {
+			if (profilingEnabled) {
+				startTime = System.nanoTime()
+			}
+
 			switch (m.getName()) {
 				case "clear":
 				case "getVertexCount":
@@ -50,7 +70,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 				case "addVertex":
 				case "removeVertex":
 				case "removeEdge":
-					if (!proxy.getGraph()) {
+					if (!proxy.getGraph()) { //TODO: don't think this block is needed anymore
 						proxy.reinitializeGraph()
 					}
 					break
@@ -119,6 +139,15 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 		} finally {
 
+			if (profilingEnabled) {
+				finishTime = System.nanoTime()
+				if (functionProfile[m.getName()]) {
+					functionProfile[m.getName()] += (finishTime - startTime)
+				} else {
+					functionProfile[m.getName()] = (finishTime - startTime)
+				}
+			}
+
 			switch (m.getName()) {
 				case "concludeManagedTransaction":
 					String graphUrl = proxy.getGraphUrl()
@@ -134,6 +163,47 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 		}
 		return result
+	}
+
+	public static void startProfiler(GraphInterface operator) {
+		GraphManagerProxy managerProxy = managerProxyForGraphOperator[operator]
+		managerProxy.startProfiler()
+	}
+
+	private void startProfiler() {
+		profilingEnabled = true
+		if (!functionProfile) {
+			functionProfile = new HashMap()
+		}
+		//Class cls = Class.forName("method1");
+		Class cls = obj.getClass()
+		def methodList = cls.getDeclaredMethods()
+		for (method in methodList) {
+			functionProfile[method.getName()] = 0
+		}
+	}
+
+	public static String stopProfiler(GraphInterface operator) {
+		GraphManagerProxy managerProxy = managerProxyForGraphOperator[operator]
+		return managerProxy.stopProfiler()
+	}
+
+	private String stopProfiler() {
+		String results = "\n------PROFILER RESULTS------\n"
+		long totalDuration = functionProfile.values().sum()
+		double totalDuration_ms = (double)totalDuration / MS_IN_NS
+		def sortedProfile = functionProfile.sort {a, b -> b.value <=> a.value}
+		results += "Total Duration = ${totalDuration_ms} ms\n"
+		for (fn in sortedProfile.keySet()) {
+			long time_ns = functionProfile[fn]
+			double percent_time = ((double)time_ns / totalDuration) * 100
+			double time_ms = (double)time_ns / MS_IN_NS
+			results += ("${fn}:\t" + "${time_ms} ms\t" + "${percent_time} %\n")
+			functionProfile[fn] = 0
+		}
+		results += "\n------xxxxxxxxxxxxxxxx------\n"
+		profilingEnabled = false
+		return results
 	}
 
 }
