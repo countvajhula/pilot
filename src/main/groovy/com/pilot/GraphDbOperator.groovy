@@ -277,17 +277,17 @@ class GraphDbOperator implements GraphInterface {
 		def edges = []
 		if (edgeLabel) {
 			if (v1.id.equals(v2)) {
-				v1.outE(edgeLabel).inV{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.outE(edgeLabel).inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
 			} else {
-				v1.outE(edgeLabel).inV{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
-				v1.inE(edgeLabel).outV{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.outE(edgeLabel).inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.inE(edgeLabel).outV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
 			}
 		} else {
 			if (v1.id.equals(v2)) {
-				v1.outE.inV{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.outE.inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
 			} else {
-				v1.outE.inV{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
-				v1.inE.outV{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.outE.inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.inE.outV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
 			}
 		}
 
