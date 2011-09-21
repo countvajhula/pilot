@@ -35,7 +35,11 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 
 		g = new OrientGraph(STORAGE_MODE + ":" + url)
 
-		println "Graph db initialized."
+		println "OrientDB graph initialized."
+	}
+
+	Vertex getVertex(long id) {
+		return g.getVertex("5:"+id) //TODO:test
 	}
 
 	// use raw API to do a faster edge retrieval

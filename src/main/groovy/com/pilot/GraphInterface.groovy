@@ -41,7 +41,9 @@ public interface GraphInterface {
 	long getVertexCount();
 	long getEdgeCount();
 	List getNeighbors(Vertex v, String idProp, String alongEdge);
+	List getNeighbors(Vertex v);
 	Vertex getVertex(String property, String value);
+	Vertex getVertex(long id);
 	Vertex addVertex();
 	Edge getEdge(Vertex v1, Vertex v2, String edgeLabel);
 	Edge addEdge(Vertex v1, Vertex v2, String edgeLabel);

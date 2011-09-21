@@ -86,6 +86,10 @@ class GraphDbOperator implements GraphInterface {
 			println "Transaction already in progress!!"
 			return
 		}
+		if (!(g instanceof TransactionalGraph)) {
+			println "Cannot begin transaction on non-transactional graph! Continuing without transactions..."
+			return
+		}
 		if (!numMutations) {
 			numMutations = numMutationsBeforeCommit
 		}
@@ -112,9 +116,13 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	void interruptManagedTransaction() {
-		println "transaction interrupted. resuming..."
-		g.stopTransaction(TransactionalGraph.Conclusion.FAILURE)
-		//g.startTransaction()
+		if (transactionInProgress) {
+			println "transaction interrupted. resuming..."
+			g.stopTransaction(TransactionalGraph.Conclusion.FAILURE)
+			//g.startTransaction()
+		} else {
+			println "Cannot interrupt managed transaction: No transaction in progress!"
+		}
 	}
 
 	boolean isTransactionInProgress() {
@@ -233,6 +241,10 @@ class GraphDbOperator implements GraphInterface {
 		return neighbors
 	}
 
+	List getNeighbors(Vertex v) {
+		return getNeighbors(v, null, null)
+	}
+
 	Vertex getVertex(String property, String value) {
 		AutomaticIndex vertexIndex = g.getIndex(Index.VERTICES, Vertex.class)
 		Iterable<Vertex> itr = vertexIndex.get(property, value)
@@ -243,7 +255,12 @@ class GraphDbOperator implements GraphInterface {
 
 		return vertex
 	}
-	
+
+	Vertex getVertex(long id) {
+		//stub. provider-specific implementation should be provided
+		return null
+	}
+
 	Vertex addVertex() {
 		return g.addVertex(null)
 	}

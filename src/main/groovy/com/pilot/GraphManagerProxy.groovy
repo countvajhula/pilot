@@ -15,7 +15,8 @@ import java.io.PrintWriter
 public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	private Object obj
 	private boolean profilingEnabled
-	private Map functionProfile
+	private Map<String, Long> functionProfile
+	private String profileName
 	private static Map graphWriteLocks = [:]
 	private static Map managerProxyForGraphOperator = [:]
 
@@ -111,10 +112,10 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 		} catch (InvocationTargetException e) {
 			println "encountered Exception: ${e.toString()}"
 			//for debugging:
-			//StringWriter sw = new StringWriter()
-			//PrintWriter pw = new PrintWriter(sw)
-			//e.printStackTrace(pw)
-			//println "encountered Exception: ${sw.toString()}"
+			StringWriter sw = new StringWriter()
+			PrintWriter pw = new PrintWriter(sw)
+			e.printStackTrace(pw)
+			println "encountered Exception: ${sw.toString()}"
 
 			if (proxy.isTransactionInProgress()) {
 				proxy.interruptManagedTransaction()
@@ -125,10 +126,10 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 		} catch (Exception e) {
 			println "encountered Exception: ${e.toString()}"
 			//for debugging:
-			//StringWriter sw = new StringWriter()
-			//PrintWriter pw = new PrintWriter(sw)
-			//e.printStackTrace(pw)
-			//println "encountered Exception: ${sw.toString()}"
+			StringWriter sw = new StringWriter()
+			PrintWriter pw = new PrintWriter(sw)
+			e.printStackTrace(pw)
+			println "encountered Exception: ${sw.toString()}"
 
 			if (proxy.isTransactionInProgress()) {
 				proxy.interruptManagedTransaction()
@@ -165,13 +166,18 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 		return result
 	}
 
-	public static void startProfiler(GraphInterface operator) {
+	public static void startProfiler(GraphInterface operator, String profileName) {
 		GraphManagerProxy managerProxy = managerProxyForGraphOperator[operator]
-		managerProxy.startProfiler()
+		managerProxy.startProfiler_(profileName)
 	}
 
-	private void startProfiler() {
+	public static void startProfiler(GraphInterface operator) {
+		GraphManagerProxy.startProfiler(operator, null)
+	}
+
+	private void startProfiler_(String profileName) {
 		profilingEnabled = true
+		this.profileName = profileName
 		if (!functionProfile) {
 			functionProfile = new HashMap()
 		}
@@ -189,7 +195,13 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	}
 
 	private String stopProfiler() {
-		String results = "\n------PROFILER RESULTS------\n"
+		String results
+		if (profileName) {
+			results = "\n------PROFILER RESULTS (${profileName}) ------\n"
+		} else {
+			results = "\n------PROFILER RESULTS------\n"
+		}
+
 		long totalDuration = functionProfile.values().sum()
 		double totalDuration_ms = (double)totalDuration / MS_IN_NS
 		def sortedProfile = functionProfile.sort {a, b -> b.value <=> a.value}
@@ -201,7 +213,11 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			results += ("${fn}:\t" + "${time_ms} ms\t" + "${percent_time} %\n")
 			functionProfile[fn] = 0
 		}
-		results += "\n------xxxxxxxxxxxxxxxx------\n"
+		if (profileName) {
+			results += "\n------xxxxxxxxxxxxxxxx (${profileName}) ------\n"
+		} else {
+			results += "\n------xxxxxxxxxxxxxxxx------\n"
+		}
 		profilingEnabled = false
 		return results
 	}

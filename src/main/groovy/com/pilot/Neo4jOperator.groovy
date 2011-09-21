@@ -20,7 +20,11 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 
 		g = new Neo4jGraph(url)
 
-		println "Graph db initialized."
+		println "Neo4j graph initialized."
+	}
+
+	Vertex getVertex(long id) {
+		return g.getVertex(id) //TODO:test
 	}
 
 }
