@@ -63,19 +63,6 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 				startTime = System.nanoTime()
 			}
 
-			switch (m.getName()) {
-				case "clear":
-				case "getVertexCount":
-				case "getEdgeCount":
-				case "getVertex":
-				case "addVertex":
-				case "removeVertex":
-				case "removeEdge":
-					if (!proxy.getGraph()) { //TODO: don't think this block is needed anymore
-						proxy.reinitializeGraph()
-					}
-					break
-			}
 			//transaction commit manager
 			switch (m.getName()) {
 				case "addVertex":
@@ -83,8 +70,11 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 				case "removeVertex":
 				case "removeEdge":
 				case "setElementProperty":
-					if (proxy.isTransactionInProgress()) {
-						if((proxy.getTransactionBufferSize_current()-1) % proxy.getTransactionBufferSize_max() == 0) {
+					Method isTransactionInProgress = obj.getClass().getMethod("isTransactionInProgress")
+					if (isTransactionInProgress.invoke(obj)) {
+						Method getTransactionBufferSize_current = obj.getClass().getMethod("getTransactionBufferSize_current")
+						Method getTransactionBufferSize_max = obj.getClass().getMethod("getTransactionBufferSize_max")
+						if((getTransactionBufferSize_current.invoke(obj)-1) % getTransactionBufferSize_max.invoke(obj) == 0) {
 							println "committing mutations to graph..."
 						}
 					}
@@ -92,7 +82,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 					break
 				case "beginManagedTransaction":
 					//graph write locking
-					String graphUrl = proxy.getGraphUrl()
+					Method getGraphUrl = obj.getClass().getMethod("getGraphUrl")
+					String graphUrl = getGraphUrl.invoke(obj)
 					Semaphore graphWriteLock
 					synchronized (this) {
 						graphWriteLock = graphWriteLocks[graphUrl]
@@ -117,8 +108,10 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			e.printStackTrace(pw)
 			println "encountered Exception: ${sw.toString()}"
 
-			if (proxy.isTransactionInProgress()) {
-				proxy.interruptManagedTransaction()
+			Method isTransactionInProgress = obj.getClass().getMethod("isTransactionInProgress")
+			if (isTransactionInProgress.invoke(obj)) {
+				Method interruptManagedTransaction = obj.getClass().getMethod("interruptManagedTransaction")
+				interruptManagedTransaction.invoke(obj)
 			}
 
 			throw e.getTargetException()
@@ -131,8 +124,10 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			e.printStackTrace(pw)
 			println "encountered Exception: ${sw.toString()}"
 
-			if (proxy.isTransactionInProgress()) {
-				proxy.interruptManagedTransaction()
+			Method isTransactionInProgress = obj.getClass().getMethod("isTransactionInProgress")
+			if (isTransactionInProgress.invoke(obj)) {
+				Method interruptManagedTransaction = obj.getClass().getMethod("interruptManagedTransaction")
+				interruptManagedTransaction.invoke(obj)
 			}
 
 			throw new RuntimeException("unexpected invocation exception: " +
@@ -151,7 +146,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 			switch (m.getName()) {
 				case "concludeManagedTransaction":
-					String graphUrl = proxy.getGraphUrl()
+					Method getGraphUrl = obj.getClass().getMethod("getGraphUrl")
+					String graphUrl = getGraphUrl.invoke(obj)
 					try {
 						Semaphore graphWriteLock = graphWriteLocks[graphUrl]
 						graphWriteLock.release()
