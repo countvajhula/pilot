@@ -19,6 +19,12 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	private String profileName
 	private static Map graphWriteLocks = [:]
 	private static Map managerProxyForGraphOperator = [:]
+	// to support direct (unproxied) method invocation
+	private Method handle_isTransactionInProgress
+	private Method handle_getTransactionBufferSize_current
+	private Method handle_getTransactionBufferSize_max
+	private Method handle_getGraphUrl
+	private Method handle_interruptManagedTransaction
 
 	private static int MS_IN_NS = 1000000
 	
@@ -46,6 +52,12 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 	private GraphManagerProxy(Object obj) {
 		this.obj = obj;
+		profilingEnabled = false
+		handle_isTransactionInProgress = obj.getClass().getMethod("isTransactionInProgress")
+		handle_getTransactionBufferSize_current = obj.getClass().getMethod("getTransactionBufferSize_current")
+		handle_getTransactionBufferSize_max = obj.getClass().getMethod("getTransactionBufferSize_max")
+		handle_getGraphUrl = obj.getClass().getMethod("getGraphUrl")
+		handle_interruptManagedTransaction = obj.getClass().getMethod("interruptManagedTransaction")
 	}
 
 	//shouldn't have to ever call this
@@ -70,11 +82,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 				case "removeVertex":
 				case "removeEdge":
 				case "setElementProperty":
-					Method isTransactionInProgress = obj.getClass().getMethod("isTransactionInProgress")
-					if (isTransactionInProgress.invoke(obj)) {
-						Method getTransactionBufferSize_current = obj.getClass().getMethod("getTransactionBufferSize_current")
-						Method getTransactionBufferSize_max = obj.getClass().getMethod("getTransactionBufferSize_max")
-						if((getTransactionBufferSize_current.invoke(obj)-1) % getTransactionBufferSize_max.invoke(obj) == 0) {
+					if (handle_isTransactionInProgress.invoke(obj)) {
+						if((handle_getTransactionBufferSize_current.invoke(obj)-1) % handle_getTransactionBufferSize_max.invoke(obj) == 0) {
 							println "committing mutations to graph..."
 						}
 					}
@@ -82,8 +91,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 					break
 				case "beginManagedTransaction":
 					//graph write locking
-					Method getGraphUrl = obj.getClass().getMethod("getGraphUrl")
-					String graphUrl = getGraphUrl.invoke(obj)
+					String graphUrl = handle_getGraphUrl.invoke(obj)
 					Semaphore graphWriteLock
 					synchronized (this) {
 						graphWriteLock = graphWriteLocks[graphUrl]
@@ -108,10 +116,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			e.printStackTrace(pw)
 			println "encountered Exception: ${sw.toString()}"
 
-			Method isTransactionInProgress = obj.getClass().getMethod("isTransactionInProgress")
-			if (isTransactionInProgress.invoke(obj)) {
-				Method interruptManagedTransaction = obj.getClass().getMethod("interruptManagedTransaction")
-				interruptManagedTransaction.invoke(obj)
+			if (handle_isTransactionInProgress.invoke(obj)) {
+				handle_interruptManagedTransaction.invoke(obj)
 			}
 
 			throw e.getTargetException()
@@ -124,10 +130,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			e.printStackTrace(pw)
 			println "encountered Exception: ${sw.toString()}"
 
-			Method isTransactionInProgress = obj.getClass().getMethod("isTransactionInProgress")
-			if (isTransactionInProgress.invoke(obj)) {
-				Method interruptManagedTransaction = obj.getClass().getMethod("interruptManagedTransaction")
-				interruptManagedTransaction.invoke(obj)
+			if (handle_isTransactionInProgress.invoke(obj)) {
+				handle_interruptManagedTransaction.invoke(obj)
 			}
 
 			throw new RuntimeException("unexpected invocation exception: " +
@@ -146,8 +150,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 			switch (m.getName()) {
 				case "concludeManagedTransaction":
-					Method getGraphUrl = obj.getClass().getMethod("getGraphUrl")
-					String graphUrl = getGraphUrl.invoke(obj)
+					String graphUrl = handle_getGraphUrl.invoke(obj)
 					try {
 						Semaphore graphWriteLock = graphWriteLocks[graphUrl]
 						graphWriteLock.release()
