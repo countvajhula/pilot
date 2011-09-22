@@ -11,6 +11,7 @@ import com.tinkerpop.gremlin.*
 public interface GraphInterface {
 
 	public static enum GraphProvider {
+		TINKERGRAPH,
 		ORIENTDB,
 		NEO4J; //can add others in future
 	}
@@ -31,6 +32,7 @@ public interface GraphInterface {
 	void beginManagedTransaction(int numMutations);
 	void concludeManagedTransaction();
 	void interruptManagedTransaction();
+	void flushTransactionBuffer();
 	boolean isTransactionInProgress(); //internal
 	int getTransactionBufferSize_current(); //internal
 	int getTransactionBufferSize_max(); //internal

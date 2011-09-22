@@ -125,6 +125,14 @@ class GraphDbOperator implements GraphInterface {
 		}
 	}
 
+	void flushTransactionBuffer() {
+		if (transactionInProgress) {
+			g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
+		} else {
+			println "Cannot flush transaction buffer: no transaction in progress!"
+		}
+	}
+
 	boolean isTransactionInProgress() {
 		return transactionInProgress
 	}

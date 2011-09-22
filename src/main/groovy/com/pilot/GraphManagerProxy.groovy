@@ -31,6 +31,9 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	public static Object newInstance(String url, GraphInterface.GraphProvider provider, boolean readOnly) throws Exception {
 		Object obj
 		switch (provider) {
+			case GraphInterface.GraphProvider.TINKERGRAPH:
+				obj = new TinkerGraphOperator(url, readOnly)
+				break
 			case GraphInterface.GraphProvider.ORIENTDB:
 				obj = new OrientDbOperator(url, readOnly)
 				break

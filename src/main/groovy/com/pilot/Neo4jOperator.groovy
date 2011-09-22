@@ -24,7 +24,7 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 	}
 
 	Vertex getVertex(long id) {
-		return g.getVertex(id) //TODO:test
+		return g.getVertex(id)
 	}
 
 }
