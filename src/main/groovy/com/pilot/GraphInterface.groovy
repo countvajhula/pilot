@@ -17,11 +17,11 @@ public interface GraphInterface {
 	}
 
 	public static enum MutationIntent {
-		MASSIVEINSERT; //can add other optimizations in future
+		BATCHINSERT; //can add other optimizations in future
 	}
 
 	public static int DEFAULT_MUTATIONS_BEFORE_COMMIT = 1000
-	public static int MASSIVEINSERT_MUTATIONS_BEFORE_COMMIT = 10000
+	public static int BATCHINSERT_MUTATIONS_BEFORE_COMMIT = 10000
 
 	void initializeGraph(String url, boolean readOnly);
 	void reinitializeGraph(); //internal

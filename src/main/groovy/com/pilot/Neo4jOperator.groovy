@@ -3,6 +3,7 @@ package com.pilot
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
 import com.tinkerpop.blueprints.pgm.impls.neo4j.*
+import com.tinkerpop.blueprints.pgm.impls.neo4jbatch.*
 
 
 class Neo4jOperator extends GraphDbOperator implements GraphInterface {
@@ -25,6 +26,23 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 
 	Vertex getVertex(long id) {
 		return g.getVertex(id)
+	}
+
+	void declareIntent(GraphInterface.MutationIntent intent) {
+		switch (intent) {
+			case GraphInterface.MutationIntent.BATCHINSERT:
+				//shutdown standard neo4j handle
+				g.shutdown()
+				//load it as a batchgraph
+				g = new Neo4jBatchGraph(graphUrl)
+				println "Neo4j batch inserter activated"
+				numMutationsBeforeCommit = GraphInterface.BATCHINSERT_MUTATIONS_BEFORE_COMMIT
+				break
+			case null:
+				g.shutdown()
+				g = new Neo4jGraph(graphUrl)
+				numMutationsBeforeCommit = GraphInterface.DEFAULT_MUTATIONS_BEFORE_COMMIT
+		}
 	}
 
 }

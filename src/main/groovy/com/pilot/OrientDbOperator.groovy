@@ -55,9 +55,9 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 
 	void declareIntent(GraphInterface.MutationIntent intent) {
 		switch (intent) {
-			case GraphInterface.MutationIntent.MASSIVEINSERT:
+			case GraphInterface.MutationIntent.BATCHINSERT:
 				g.getRawGraph().declareIntent(new OIntentMassiveInsert())
-				numMutationsBeforeCommit = GraphInterface.MASSIVEINSERT_MUTATIONS_BEFORE_COMMIT
+				numMutationsBeforeCommit = GraphInterface.BATCHINSERT_MUTATIONS_BEFORE_COMMIT
 				break
 			case null:
 				g.getRawGraph().declareIntent(null)
