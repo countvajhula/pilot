@@ -28,6 +28,10 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 		return g.getVertex(id)
 	}
 
+	Edge getEdge(long id) {
+		return g.getEdge(id)
+	}
+
 	void declareIntent(GraphInterface.MutationIntent intent) {
 		switch (intent) {
 			case GraphInterface.MutationIntent.BATCHINSERT:

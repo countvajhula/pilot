@@ -24,6 +24,7 @@ class GraphDbOperator implements GraphInterface {
 	//TODO:
 	//FOAF, with degree as input
 	//BFS, DFS (iterators)
+	//change all returned results to iterators, + add convenience list functions
 
 	public GraphDbOperator(String url, boolean readOnly) {
 		Semaphore graphWriteConnectionLock
@@ -188,7 +189,7 @@ class GraphDbOperator implements GraphInterface {
 		return vertices
 	}
 
-	List getEdges(String idProp) {
+	List<Edge> getEdges(String idProp) {
 		List edges = []
 		if (idProp) {
 			g.E[idProp].aggregate(edges) >> -1
@@ -207,6 +208,8 @@ class GraphDbOperator implements GraphInterface {
 		return g.E.count()
 	}
 
+	//TODO: return an iterator over neighbors. current behavior can be captured
+	//in a separate function getNeighborList, which calls aggregate on the returned pipe
 	List getNeighbors(Vertex v, String idProp, String alongEdge) {
 		//idProp is the property of the result vertices that will be returned
 		//if null, then the vertices themselves will be returned
@@ -253,6 +256,7 @@ class GraphDbOperator implements GraphInterface {
 		return getNeighbors(v, null, null)
 	}
 
+	//TODO: return an iterator over vertices
 	Vertex getVertex(String property, String value) {
 		AutomaticIndex vertexIndex = g.getIndex(Index.VERTICES, Vertex.class)
 		Iterable<Vertex> itr = vertexIndex.get(property, value)
@@ -281,7 +285,8 @@ class GraphDbOperator implements GraphInterface {
 		g.removeEdge(ee)
 	}
 
-	Edge getEdge(Vertex v1, Vertex v2, String edgeLabel) {
+	//TODO: return an iterator instead, and don't aggregate results
+	List<Edge> getEdges(Vertex v1, Vertex v2, String edgeLabel) {
 		def edges = []
 		if (edgeLabel) {
 			if (v1.id.equals(v2.id)) {
@@ -299,9 +304,11 @@ class GraphDbOperator implements GraphInterface {
 			}
 		}
 
-		if (edges) {
-			return edges[0]
-		}
+		return edges
+	}
+
+	Edge getEdge(long id) {
+		//stub. provider-specific implementation should be provided
 		return null
 	}
 

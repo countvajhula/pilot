@@ -31,4 +31,8 @@ class TinkerGraphOperator extends GraphDbOperator implements GraphInterface {
 		return g.getVertex(id) //TODO:test
 	}
 
+	Edge getEdge(long id) {
+		return g.getEdge(id)
+	}
+
 }

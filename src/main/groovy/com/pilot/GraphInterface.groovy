@@ -47,10 +47,11 @@ public interface GraphInterface {
 	Vertex getVertex(String property, String value);
 	Vertex getVertex(long id);
 	Vertex addVertex();
-	Edge getEdge(Vertex v1, Vertex v2, String edgeLabel);
+	List<Edge> getEdges(Vertex v1, Vertex v2, String edgeLabel);
 	Edge addEdge(Vertex v1, Vertex v2, String edgeLabel);
 	void removeVertex(Vertex vv);
 	void removeEdge(Edge ee);
+	Edge getEdge(long id);
 	void setElementProperty(Element elem, String property, Object value);
 	Object getElementProperty(Element elem, String property);
 	

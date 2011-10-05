@@ -39,7 +39,11 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 	}
 
 	Vertex getVertex(long id) {
-		return g.getVertex("5:"+id) //TODO:test
+		return g.getVertex("#5:"+id) //TODO:test
+	}
+
+	Edge getEdge(long id) {
+		return g.getEdge("#6:"+id)
 	}
 
 	// use raw API to do a faster edge retrieval

@@ -1,11 +1,12 @@
 h1. Introduction
 
-Pilot is a graph database operator that allows you to perform common application-level operations on graph databases without delving into the details of their implementation or requiring knowledge of the component technologies. 
-Pilot aims to support graph databases conforming to the "property graph model":http://github.com/tinkerpop/gremlin/wiki/Defining-a-Property-Graph. Pilot employs technologies from the "Tinkerpop":http://www.tinkerpop.com stack -- specifically "Blueprints":http://blueprints.tinkerpop.com and "Gremlin":http://gremlin.tinkerpop.com -- for general access and manipulation of the underlying graph database, but also uses native graph database APIs to further optimize performance for certain operations. In addition, Pilot also handles multithreading and transaction management, while keeping all of these abstracted away from the calling application.
+Pilot is a graph database operator that allows you to perform common application-level operations on graph databases without delving into the details of their implementation or requiring knowledge of the component technologies.
+Pilot aims to support graph databases conforming to the "property graph model":http://github.com/tinkerpop/gremlin/wiki/Defining-a-Property-Graph. Pilot employs technologies from the "Tinkerpop":http://www.tinkerpop.com stack -- specifically "Blueprints":http://blueprints.tinkerpop.com and "Gremlin":http://gremlin.tinkerpop.com -- for general access and manipulation of the underlying graph database, but also uses native graph database APIs to further optimize performance for certain operations. In addition, Pilot also handles multithreading and transaction management, while keeping all of these abstracted away from the calling application. As such, Pilot is ideally suited for use in concurrent web applications.
 
 * Supported graph database providers:
 ** "OrientDB":http://www.orientechnologies.com
 ** "Neo4j":http://neo4j.org
+** "Tinkergraph":https://github.com/tinkerpop/blueprints/wiki/TinkerGraph (the Blueprints in-memory reference implementation)
 ** (others may be added in future if there is demand)
 
 * Some of the functionality currently supported by Pilot include:
@@ -14,13 +15,13 @@ Pilot aims to support graph databases conforming to the "property graph model":h
 ** Retrieving vertices corresponding to some properties (see Property Graph Model)
 ** Transaction management
 ** Thread synchronization for multithreaded access
-** Large commit optimization (alpha)
+** Large commit optimization
+** Application profiling
 
 * Planned additions:
 ** FOAF
 ** DFS
 ** BFS
-** Usage profiling
 
 h1. Using Pilot
 
