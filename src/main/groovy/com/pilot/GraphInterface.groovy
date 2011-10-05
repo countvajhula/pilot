@@ -21,7 +21,7 @@ public interface GraphInterface {
 	}
 
 	public static int DEFAULT_MUTATIONS_BEFORE_COMMIT = 1000
-	public static int BATCHINSERT_MUTATIONS_BEFORE_COMMIT = 10000
+	public static int BATCHINSERT_MUTATIONS_BEFORE_COMMIT = 1
 
 	void initializeGraph(String url, boolean readOnly);
 	void reinitializeGraph(); //internal

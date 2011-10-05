@@ -284,14 +284,14 @@ class GraphDbOperator implements GraphInterface {
 	Edge getEdge(Vertex v1, Vertex v2, String edgeLabel) {
 		def edges = []
 		if (edgeLabel) {
-			if (v1.id.equals(v2)) {
+			if (v1.id.equals(v2.id)) {
 				v1.outE(edgeLabel).inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
 			} else {
 				v1.outE(edgeLabel).inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
 				v1.inE(edgeLabel).outV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
 			}
 		} else {
-			if (v1.id.equals(v2)) {
+			if (v1.id.equals(v2.id)) {
 				v1.outE.inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
 			} else {
 				v1.outE.inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
