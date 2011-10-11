@@ -108,7 +108,7 @@ class GraphDbOperator implements GraphInterface {
 				interruptManagedTransaction()
 				g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
 			}
-			g.setMaxBufferSize(0)
+			g.setMaxBufferSize(1)
 			transactionInProgress = false
 			println "managed transaction concluded."
 		} else {
