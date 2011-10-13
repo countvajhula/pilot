@@ -58,15 +58,19 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 	}
 
 	void declareIntent(GraphInterface.MutationIntent intent) {
+		if (transactionInProgress) {
+			println "Mutation Intent cannot be changed inside a transaction! Ignoring..."
+			//TODO: better to throw a custom exception and handle it in GraphManagerProxy
+			return
+		}
 		switch (intent) {
 			case GraphInterface.MutationIntent.BATCHINSERT:
 				g.getRawGraph().declareIntent(new OIntentMassiveInsert())
-				numMutationsBeforeCommit = GraphInterface.BATCHINSERT_MUTATIONS_BEFORE_COMMIT
+				mutationIntent = GraphInterface.MutationIntent.BATCHINSERT
 				break
-			case null:
+			default: //including 'null'
 				g.getRawGraph().declareIntent(null)
-				numMutationsBeforeCommit = GraphInterface.DEFAULT_MUTATIONS_BEFORE_COMMIT
+				mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
 		}
 	}
-
 }

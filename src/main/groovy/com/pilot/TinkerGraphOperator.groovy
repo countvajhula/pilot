@@ -7,8 +7,6 @@ import com.tinkerpop.blueprints.pgm.impls.tg.*
 
 class TinkerGraphOperator extends GraphDbOperator implements GraphInterface {
 
-	public static final String STORAGE_MODE = "local"
-
 	public TinkerGraphOperator(String url, boolean readOnly) {
 		super(url, readOnly)
 		initializeGraph (url, readOnly)

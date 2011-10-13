@@ -11,13 +11,21 @@ import java.util.concurrent.Semaphore
 class GraphDbOperator implements GraphInterface {
 
 	static {
+		// load gremlin for graph traversals
 		Gremlin.load()
+
+		//define # mutations before commit for each transaction mode
+		MutationsBeforeCommit = new EnumMap(GraphInterface.MutationIntent.class)
+		MutationsBeforeCommit[GraphInterface.MutationIntent.STANDARDTRANSACTION] = 1000
+		MutationsBeforeCommit[GraphInterface.MutationIntent.BATCHINSERT] = 1
+		MutationsBeforeCommit[GraphInterface.MutationIntent.NONTRANSACTION] = 1
 	}
 
 	protected Graph g
 	protected String graphUrl
 	protected boolean transactionInProgress
-	protected int numMutationsBeforeCommit
+	protected GraphInterface.MutationIntent mutationIntent
+	protected static EnumMap<GraphInterface.MutationIntent, Integer> MutationsBeforeCommit
 	protected static Map graphWriteConnectionLocks = [:] //can be private?
 	protected boolean readOnly //can be private?
 	
@@ -33,7 +41,7 @@ class GraphDbOperator implements GraphInterface {
 			graphWriteConnectionLock = new Semaphore(1, true)
 			graphWriteConnectionLocks[url] = graphWriteConnectionLock
 		}
-		numMutationsBeforeCommit = GraphInterface.DEFAULT_MUTATIONS_BEFORE_COMMIT
+		mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
 		transactionInProgress = false
 	}
 
@@ -79,7 +87,7 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	void beginManagedTransaction() {
-		beginManagedTransaction(numMutationsBeforeCommit)
+		beginManagedTransaction(MutationsBeforeCommit[mutationIntent])
 	}
 
 	void beginManagedTransaction(int numMutations) {
@@ -92,7 +100,7 @@ class GraphDbOperator implements GraphInterface {
 			return
 		}
 		if (!numMutations) {
-			numMutations = numMutationsBeforeCommit
+			numMutations = MutationsBeforeCommit[mutationIntent]
 		}
 		g.setMaxBufferSize(numMutations)
 		transactionInProgress = true
@@ -108,7 +116,7 @@ class GraphDbOperator implements GraphInterface {
 				interruptManagedTransaction()
 				g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
 			}
-			g.setMaxBufferSize(1)
+			g.setMaxBufferSize(MutationsBeforeCommit[GraphInterface.MutationIntent.NONTRANSACTION])
 			transactionInProgress = false
 			println "managed transaction concluded."
 		} else {
@@ -143,7 +151,7 @@ class GraphDbOperator implements GraphInterface {
 	}
 
 	int getTransactionBufferSize_max() {
-		return numMutationsBeforeCommit
+		return g.getMaxBufferSize()
 	}
 
 	void declareIntent(GraphInterface.MutationIntent intent) {

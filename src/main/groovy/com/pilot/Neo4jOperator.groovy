@@ -8,8 +8,6 @@ import com.tinkerpop.blueprints.pgm.impls.neo4jbatch.*
 
 class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 
-	public static final String STORAGE_MODE = "local"
-
 	public Neo4jOperator(String url, boolean readOnly) {
 		super(url, readOnly)
 		initializeGraph (url, readOnly)
@@ -33,6 +31,11 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 	}
 
 	void declareIntent(GraphInterface.MutationIntent intent) {
+		if (transactionInProgress) {
+			println "Mutation Intent cannot be changed inside a transaction! Ignoring..."
+			//TODO: better to throw a custom exception and handle it in GraphManagerProxy
+			return
+		}
 		switch (intent) {
 			case GraphInterface.MutationIntent.BATCHINSERT:
 				//shutdown standard neo4j handle
@@ -40,13 +43,12 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 				//load it as a batchgraph
 				g = new Neo4jBatchGraph(graphUrl)
 				println "Neo4j batch inserter activated"
-				numMutationsBeforeCommit = GraphInterface.BATCHINSERT_MUTATIONS_BEFORE_COMMIT
+				mutationIntent = GraphInterface.MutationIntent.BATCHINSERT
 				break
-			case null:
+			default: //including 'null'
 				g.shutdown()
 				g = new Neo4jGraph(graphUrl)
-				numMutationsBeforeCommit = GraphInterface.DEFAULT_MUTATIONS_BEFORE_COMMIT
+				mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
 		}
 	}
-
 }
