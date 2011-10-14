@@ -315,6 +315,28 @@ class GraphDbOperator implements GraphInterface {
 		return edges
 	}
 
+	List<Edge> getOutgoingEdges(Vertex vv, String edgeLabel) {
+		def edges = []
+		if (edgeLabel) {
+			vv.outE(edgeLabel).aggregate(edges) >> -1
+		} else {
+			vv.outE.aggregate(edges) >> -1
+		}
+
+		return edges
+	}
+
+	List<Edge> getIncomingEdges(Vertex vv, String edgeLabel) {
+		def edges = []
+		if (edgeLabel) {
+			vv.inE(edgeLabel).aggregate(edges) >> -1
+		} else {
+			vv.inE.aggregate(edges) >> -1
+		}
+
+		return edges
+	}
+
 	Edge getEdge(long id) {
 		//stub. provider-specific implementation should be provided
 		return null
