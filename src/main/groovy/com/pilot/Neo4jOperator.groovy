@@ -30,25 +30,32 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 		return g.getEdge(id)
 	}
 
-	void declareIntent(GraphInterface.MutationIntent intent) {
-		if (transactionInProgress) {
-			println "Mutation Intent cannot be changed inside a transaction! Ignoring..."
-			//TODO: better to throw a custom exception and handle it in GraphManagerProxy
-			return
+	void beginManagedTransaction(GraphInterface.MutationIntent transactionType) {
+		if (!transactionInProgress) {
+			switch (transactionType) {
+				case GraphInterface.MutationIntent.BATCHINSERT:
+					//shutdown standard neo4j handle
+					g.shutdown()
+					//load it as a batchgraph
+					g = new Neo4jBatchGraph(graphUrl)
+					println "Neo4j batch inserter activated"
+					break
+				default: //including 'null'
+					break
+			}
 		}
-		switch (intent) {
-			case GraphInterface.MutationIntent.BATCHINSERT:
-				//shutdown standard neo4j handle
-				g.shutdown()
-				//load it as a batchgraph
-				g = new Neo4jBatchGraph(graphUrl)
-				println "Neo4j batch inserter activated"
-				mutationIntent = GraphInterface.MutationIntent.BATCHINSERT
-				break
-			default: //including 'null'
+
+		super.beginManagedTransaction(transactionType)
+	}
+
+	void concludeManagedTransaction() {
+		if (transactionInProgress) {
+			if (mutationIntent == GraphInterface.MutationIntent.BATCHINSERT) {
 				g.shutdown()
 				g = new Neo4jGraph(graphUrl)
-				mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
+			}
 		}
+		super.concludeManagedTransaction()
 	}
+
 }

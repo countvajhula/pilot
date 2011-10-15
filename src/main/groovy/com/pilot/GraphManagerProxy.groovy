@@ -87,7 +87,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 				case "setElementProperty":
 					if (handle_isTransactionInProgress.invoke(obj)) {
 						if((handle_getTransactionBufferSize_current.invoke(obj)-1) % handle_getTransactionBufferSize_max.invoke(obj) == 0) {
-							println "committing mutations to graph..."
+							//println "committing mutations to graph..."
 						}
 					}
 

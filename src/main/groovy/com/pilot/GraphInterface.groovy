@@ -29,13 +29,13 @@ public interface GraphInterface {
 	String getGraphUrl();
 	void beginManagedTransaction();
 	void beginManagedTransaction(int numMutations);
+	void beginManagedTransaction(MutationIntent transactionType);
 	void concludeManagedTransaction();
 	void interruptManagedTransaction();
 	void flushTransactionBuffer();
 	boolean isTransactionInProgress(); //internal
 	int getTransactionBufferSize_current(); //internal
 	int getTransactionBufferSize_max(); //internal
-	void declareIntent(MutationIntent intent);
 	void clear();
 	List getVertices(String idProp);
 	List getEdges(String idProp);

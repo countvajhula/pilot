@@ -86,18 +86,28 @@ class GraphDbOperator implements GraphInterface {
 		return graphUrl
 	}
 
+	/** Begins a STANDARD managed transaction using a default transaction buffer size */
 	void beginManagedTransaction() {
+		if (!transactionInProgress) {
+			mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
+		}
 		beginManagedTransaction(MutationsBeforeCommit[mutationIntent])
 	}
 
+	/** Begins a managed transaction and uses the specified number of
+	 * mutations as the size of the transaction buffer */
 	void beginManagedTransaction(int numMutations) {
 		if (transactionInProgress) {
+			//TODO: better to throw a custom exception and handle it in GraphManagerProxy
 			println "Transaction already in progress!!"
 			return
 		}
 		if (!(g instanceof TransactionalGraph)) {
 			println "Cannot begin transaction on non-transactional graph! Continuing without transactions..."
 			return
+		}
+		if (mutationIntent == GraphInterface.MutationIntent.NONTRANSACTION) {
+			mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
 		}
 		if (!numMutations) {
 			numMutations = MutationsBeforeCommit[mutationIntent]
@@ -108,6 +118,16 @@ class GraphDbOperator implements GraphInterface {
 		println "managed transaction begun..."
 	}
 
+	/** Begins a managed transaction of the specified type (currently either
+	 * STANDARD or BATCH) */
+	void beginManagedTransaction(GraphInterface.MutationIntent transactionType) {
+		//implementation will be provider-specific
+		if (!transactionInProgress) {
+			mutationIntent = transactionType
+		}
+		beginManagedTransaction(MutationsBeforeCommit[mutationIntent])
+	}
+
 	void concludeManagedTransaction() {
 		if (transactionInProgress) {
 			try {
@@ -116,6 +136,7 @@ class GraphDbOperator implements GraphInterface {
 				interruptManagedTransaction()
 				g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
 			}
+			mutationIntent = GraphInterface.MutationIntent.NONTRANSACTION
 			g.setMaxBufferSize(MutationsBeforeCommit[GraphInterface.MutationIntent.NONTRANSACTION])
 			transactionInProgress = false
 			println "managed transaction concluded."
@@ -152,10 +173,6 @@ class GraphDbOperator implements GraphInterface {
 
 	int getTransactionBufferSize_max() {
 		return g.getMaxBufferSize()
-	}
-
-	void declareIntent(GraphInterface.MutationIntent intent) {
-		//implementation will be provider-specific?
 	}
 
 	void clear() {
