@@ -11,7 +11,12 @@ import com.tinkerpop.blueprints.pgm.impls.neo4jbatch.Neo4jBatchGraph
 import com.tinkerpop.blueprints.pgm.impls.orientdb.*
 import com.tinkerpop.blueprints.pgm.util.*
 
-/** A demo app for the Pilot graph operator https://github.com/countvajhula/pilot */
+/** A demo app for the Pilot graph operator https://github.com/countvajhula/pilot
+ * To run: change file permissions to make it executable:
+ * 		$ chmod +x TestFlight.groovy
+ * Then execute:
+ * 		$ ./TestFlight.groovy
+ * */
 public class TestFlight {
 
 	// configure the graph database provider and location here
