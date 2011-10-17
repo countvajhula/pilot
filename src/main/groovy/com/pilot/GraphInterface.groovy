@@ -37,8 +37,8 @@ public interface GraphInterface {
 	int getTransactionBufferSize_current(); //internal
 	int getTransactionBufferSize_max(); //internal
 	void clear();
-	List getVertices(String idProp);
-	List getEdges(String idProp);
+	List getAllVertices(String idProp);
+	List getAllEdges(String idProp);
 	long getVertexCount();
 	long getEdgeCount();
 	List getNeighbors(Vertex v, String idProp, String alongEdge);

@@ -203,7 +203,7 @@ class GraphDbOperator implements GraphInterface {
 		}
 	}
 
-	List getVertices(String idProp) {
+	List getAllVertices(String idProp) {
 		List vertices = []
 		if (idProp) {
 			g.V[idProp].aggregate(vertices) >> -1
@@ -214,7 +214,7 @@ class GraphDbOperator implements GraphInterface {
 		return vertices
 	}
 
-	List<Edge> getEdges(String idProp) {
+	List<Edge> getAllEdges(String idProp) {
 		List edges = []
 		if (idProp) {
 			g.E[idProp].aggregate(edges) >> -1
