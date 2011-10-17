@@ -45,7 +45,7 @@ h1. Examples
 
 h3. Initializing a graph
 
-GraphInterface myGraph = GraphManagerProxy.newInstance('/Users/sid/graph/mygraphdb1', GraphInterface.GraphProvider.ORIENTDB, false) //the read-only flag will be removed in a future version
+GraphInterface myGraph = GraphManagerProxy.initializeGraph('/Users/sid/graph/mygraphdb1', GraphInterface.GraphProvider.ORIENTDB, false) //the read-only flag will be removed in a future version
 
 h3. Miscellaneous operations
 

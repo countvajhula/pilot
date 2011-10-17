@@ -28,7 +28,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 	private static int MS_IN_NS = 1000000
 	
-	public static Object newInstance(String url, GraphInterface.GraphProvider provider, boolean readOnly) throws Exception {
+	public static Object initializeGraph(String url, GraphInterface.GraphProvider provider, boolean readOnly) throws Exception {
 		Object obj
 		switch (provider) {
 			case GraphInterface.GraphProvider.TINKERGRAPH:
