@@ -5,11 +5,6 @@ import com.pilot.GraphInterface.GraphProvider
 import com.pilot.GraphInterface.MutationIntent
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
-import com.tinkerpop.blueprints.pgm.impls.neo4j.*
-import com.tinkerpop.blueprints.pgm.impls.neo4jbatch.*
-import com.tinkerpop.blueprints.pgm.impls.neo4jbatch.Neo4jBatchGraph
-import com.tinkerpop.blueprints.pgm.impls.orientdb.*
-import com.tinkerpop.blueprints.pgm.util.*
 
 /** A demo app for the Pilot graph operator https://github.com/countvajhula/pilot
  * To run: change file permissions to make it executable:
@@ -20,7 +15,7 @@ import com.tinkerpop.blueprints.pgm.util.*
 public class TestFlight {
 
 	// configure the graph database provider and location here
-	public static final GraphProvider graphProvider = GraphProvider.NEO4J // ORIENTDB, TINKERGRAPH
+	public static final GraphProvider graphProvider = GraphProvider.TINKERGRAPH // NEO4J, ORIENTDB
 	public static final String graphUrl = "./my-" + graphProvider.toString() + "-graphdb"
 
 	public static void main(String[] args) {
