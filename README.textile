@@ -19,6 +19,7 @@ Pilot aims to support graph databases conforming to the "property graph model":h
 ** Application profiling
 
 * Planned additions:
+** Support for "Furnace":https://github.com/tinkerpop/furnace/wiki
 ** FOAF
 ** DFS
 ** BFS
@@ -73,7 +74,17 @@ myGraph.beginManagedTransaction()
 
 myGraph.concludeManagedTransaction()
 
+h3. Profiling
+
+GraphManagerProxy.startProfiler(myGraph, "Name-of-profile")
+
+//...
+// whatever graph operations you want to profile
+//...
+
+String results = GraphManagerProxy.stopProfiler(myGraph)
+
 h1. Documentation
 
-More documentation is on the way! For now, looking at GraphInterface.groovy would be a way to get familiar with the API.
+More documentation is on the way! For now, the demo app TestFlight.groovy should help you get started. Also, looking at GraphInterface.groovy would be a way to get familiar with the API.
 
