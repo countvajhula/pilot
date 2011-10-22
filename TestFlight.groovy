@@ -26,7 +26,7 @@ public class TestFlight {
 		GraphInterface g = GraphManagerProxy.initializeGraph(graphUrl, graphProvider, false)
 
 		// start the built-in application profiler to visualize performance
-		GraphManagerProxy.startProfiler((GraphInterface)g, "2000 arbitrary graph operations")
+		GraphManagerProxy.startProfiler(g, "2000 arbitrary graph operations")
 
 		// transactions can be either standard managed transactions, or "batch" transactions
 		// if you want to optimize performance for a large insertion
@@ -49,7 +49,7 @@ public class TestFlight {
 		g.concludeManagedTransaction()
 
 		// displays profiler results for this entire operation
-		println GraphManagerProxy.stopProfiler((GraphInterface)g)
+		println GraphManagerProxy.stopProfiler(g)
 
 		// don't forget to shutdown the graph
 		g.shutdown()

@@ -43,7 +43,7 @@ public interface GraphInterface {
 	long getEdgeCount();
 	List getNeighbors(Vertex v, String idProp, String alongEdge);
 	List getNeighbors(Vertex v);
-	Vertex getVertex(String property, String value);
+	Iterable<Vertex> getVertex(String property, Object value);
 	Vertex getVertex(long id);
 	Vertex addVertex();
 	void removeVertex(Vertex vv);

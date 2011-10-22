@@ -281,16 +281,11 @@ class GraphDbOperator implements GraphInterface {
 		return getNeighbors(v, null, null)
 	}
 
-	//TODO: return an iterator over vertices
-	Vertex getVertex(String property, String value) {
+	Iterable<Vertex> getVertex(String property, Object value) {
 		AutomaticIndex vertexIndex = g.getIndex(Index.VERTICES, Vertex.class)
 		Iterable<Vertex> itr = vertexIndex.get(property, value)
-		Vertex vertex
-		if (itr) {
-			vertex = itr.next()
-		}
 
-		return vertex
+		return itr
 	}
 
 	Vertex getVertex(long id) {
