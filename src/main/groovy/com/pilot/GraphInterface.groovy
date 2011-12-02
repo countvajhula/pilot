@@ -18,11 +18,11 @@ public interface GraphInterface {
 
 	public static enum MutationIntent {
 		STANDARDTRANSACTION,
-			BATCHINSERT,
-			NONTRANSACTION;
+		BATCHINSERT,
+		NONTRANSACTION;
 	}
 
-	void initializeGraph(String url, boolean readOnly);
+	void initializeGraph(String url, boolean readOnly) throws Exception;
 	void reinitializeGraph(); //internal
 	void shutdown();
 	Graph getGraph();

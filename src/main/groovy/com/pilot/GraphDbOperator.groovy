@@ -47,7 +47,7 @@ class GraphDbOperator implements GraphInterface {
 
 	//change to return status
 	//TODO: remove readOnly flag in future when pessimistic locking is supported by underlying db
-	void initializeGraph(String url, boolean readOnly) {
+	void initializeGraph(String url, boolean readOnly) throws Exception {
 		this.readOnly = readOnly
 		if (!readOnly) {
 			graphWriteConnectionLocks[url].acquire()

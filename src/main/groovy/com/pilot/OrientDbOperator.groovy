@@ -22,7 +22,7 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 		initializeGraph (url, readOnly)
 	}
 
-	void initializeGraph (String url, boolean readOnly) {
+	void initializeGraph (String url, boolean readOnly) throws Exception {
 
 		super.initializeGraph(url, readOnly)
 
@@ -34,6 +34,9 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 		//OGlobalConfiguration.DB_CACHE_SIZE.setValue(0);
 
 		g = new OrientGraph(STORAGE_MODE + ":" + url)
+		if (!g) {
+			throw new Exception("Could not create OrientGraph object for URL: ${url}!")
+		}
 
 		println "OrientDB graph initialized."
 	}

@@ -12,7 +12,7 @@ class TinkerGraphOperator extends GraphDbOperator implements GraphInterface {
 		initializeGraph (url, readOnly)
 	}
 
-	void initializeGraph (String url, boolean readOnly) {
+	void initializeGraph (String url, boolean readOnly) throws Exception {
 
 		super.initializeGraph(url, readOnly)
 
@@ -20,6 +20,9 @@ class TinkerGraphOperator extends GraphDbOperator implements GraphInterface {
 			g = new TinkerGraph(url) //will be serialized to disk upon shutdown()
 		} else {
 			g = new TinkerGraph()
+		}
+		if (!g) {
+			throw new Exception("Could not create TinkerGraph object for URL: ${url}!")
 		}
 
 		println "TinkerGraph graph initialized."

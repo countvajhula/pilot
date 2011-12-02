@@ -13,11 +13,14 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 		initializeGraph (url, readOnly)
 	}
 
-	void initializeGraph (String url, boolean readOnly) {
+	void initializeGraph (String url, boolean readOnly) throws Exception {
 
 		super.initializeGraph(url, readOnly)
 
 		g = new Neo4jGraph(url)
+		if (!g) {
+			throw new Exception("Could not create Neo4jGraph object for URL: ${url}!")
+		}
 
 		println "Neo4j graph initialized."
 	}

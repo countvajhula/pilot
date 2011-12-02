@@ -13,7 +13,7 @@ import java.io.PrintWriter
  * all calls to the graph.
  */
 public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
-	private Object obj
+	private Object proxiedObj
 	private boolean profilingEnabled
 	private Map<String, Long> functionProfile
 	private String profileName
@@ -29,38 +29,38 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 	private static int MS_IN_NS = 1000000
 	
 	public static Object initializeGraph(String url, GraphInterface.GraphProvider provider, boolean readOnly) throws Exception {
-		Object obj
+		Object proxiedObj
 		switch (provider) {
 			case GraphInterface.GraphProvider.TINKERGRAPH:
-				obj = new TinkerGraphOperator(url, readOnly)
+				proxiedObj = new TinkerGraphOperator(url, readOnly)
 				break
 			case GraphInterface.GraphProvider.ORIENTDB:
-				obj = new OrientDbOperator(url, readOnly)
+				proxiedObj = new OrientDbOperator(url, readOnly)
 				break
 			case GraphInterface.GraphProvider.NEO4J:
-				obj = new Neo4jOperator(url, readOnly)
+				proxiedObj = new Neo4jOperator(url, readOnly)
 				break
 			default:
 				throw new Exception("Graph provider invalid or not supported!")
 		}
 
-		GraphManagerProxy managerProxy = new GraphManagerProxy(obj)
-		managerProxyForGraphOperator[obj] = managerProxy
+		GraphManagerProxy managerProxy = new GraphManagerProxy(proxiedObj)
+		managerProxyForGraphOperator[proxiedObj] = managerProxy
 
 		return java.lang.reflect.Proxy.newProxyInstance(
-				obj.getClass().getClassLoader(),
-				obj.getClass().getInterfaces(),
+				proxiedObj.getClass().getClassLoader(),
+				proxiedObj.getClass().getInterfaces(),
 				managerProxy)
 	}
 
-	private GraphManagerProxy(Object obj) {
-		this.obj = obj;
+	private GraphManagerProxy(Object proxiedObj) {
+		this.proxiedObj = proxiedObj;
 		profilingEnabled = false
-		handle_isTransactionInProgress = obj.getClass().getMethod("isTransactionInProgress")
-		handle_getTransactionBufferSize_current = obj.getClass().getMethod("getTransactionBufferSize_current")
-		handle_getTransactionBufferSize_max = obj.getClass().getMethod("getTransactionBufferSize_max")
-		handle_getGraphUrl = obj.getClass().getMethod("getGraphUrl")
-		handle_interruptManagedTransaction = obj.getClass().getMethod("interruptManagedTransaction")
+		handle_isTransactionInProgress = proxiedObj.getClass().getMethod("isTransactionInProgress")
+		handle_getTransactionBufferSize_current = proxiedObj.getClass().getMethod("getTransactionBufferSize_current")
+		handle_getTransactionBufferSize_max = proxiedObj.getClass().getMethod("getTransactionBufferSize_max")
+		handle_getGraphUrl = proxiedObj.getClass().getMethod("getGraphUrl")
+		handle_interruptManagedTransaction = proxiedObj.getClass().getMethod("interruptManagedTransaction")
 	}
 
 	//shouldn't have to ever call this
@@ -85,8 +85,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 				case "removeVertex":
 				case "removeEdge":
 				case "setElementProperty":
-					if (handle_isTransactionInProgress.invoke(obj)) {
-						if((handle_getTransactionBufferSize_current.invoke(obj)-1) % handle_getTransactionBufferSize_max.invoke(obj) == 0) {
+					if (handle_isTransactionInProgress.invoke(proxiedObj)) {
+						if((handle_getTransactionBufferSize_current.invoke(proxiedObj)-1) % handle_getTransactionBufferSize_max.invoke(proxiedObj) == 0) {
 							//println "committing mutations to graph..."
 						}
 					}
@@ -94,7 +94,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 					break
 				case "beginManagedTransaction":
 					//graph write locking
-					String graphUrl = handle_getGraphUrl.invoke(obj)
+					String graphUrl = handle_getGraphUrl.invoke(proxiedObj)
 					Semaphore graphWriteLock
 					synchronized (this) {
 						graphWriteLock = graphWriteLocks[graphUrl]
@@ -109,7 +109,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			}
 			
 			//## invoke the proxied function ##//
-			result = m.invoke(obj, args)
+			result = m.invoke(proxiedObj, args)
 
 		} catch (InvocationTargetException e) {
 			println "encountered Exception: ${e.toString()}"
@@ -119,8 +119,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			e.printStackTrace(pw)
 			println "encountered Exception: ${sw.toString()}"
 
-			if (handle_isTransactionInProgress.invoke(obj)) {
-				handle_interruptManagedTransaction.invoke(obj)
+			if (handle_isTransactionInProgress.invoke(proxiedObj)) {
+				handle_interruptManagedTransaction.invoke(proxiedObj)
 			}
 
 			throw e.getTargetException()
@@ -133,8 +133,8 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			e.printStackTrace(pw)
 			println "encountered Exception: ${sw.toString()}"
 
-			if (handle_isTransactionInProgress.invoke(obj)) {
-				handle_interruptManagedTransaction.invoke(obj)
+			if (handle_isTransactionInProgress.invoke(proxiedObj)) {
+				handle_interruptManagedTransaction.invoke(proxiedObj)
 			}
 
 			throw new RuntimeException("unexpected invocation exception: " +
@@ -153,7 +153,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 			switch (m.getName()) {
 				case "concludeManagedTransaction":
-					String graphUrl = handle_getGraphUrl.invoke(obj)
+					String graphUrl = handle_getGraphUrl.invoke(proxiedObj)
 					try {
 						Semaphore graphWriteLock = graphWriteLocks[graphUrl]
 						graphWriteLock.release()
@@ -184,7 +184,7 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 			functionProfile = new HashMap()
 		}
 		//Class cls = Class.forName("method1");
-		Class cls = obj.getClass()
+		Class cls = proxiedObj.getClass()
 		def methodList = cls.getDeclaredMethods()
 		for (method in methodList) {
 			functionProfile[method.getName()] = 0
