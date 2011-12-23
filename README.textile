@@ -86,5 +86,5 @@ String results = GraphManagerProxy.stopProfiler(myGraph)
 
 h1. Documentation
 
-More documentation is on the way! For now, the demo app TestFlight.groovy should help you get started. Also, looking at GraphInterface.groovy would be a way to get familiar with the API.
+The "Wiki":https://github.com/countvajhula/pilot/wiki would be a good place to start. Also try the demo script TestFlight.groovy for a working implementation of some of the features.
 
