@@ -2,7 +2,7 @@ package com.pilot
 
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
-import com.tinkerpop.gremlin.*
+import com.tinkerpop.gremlin.groovy.*
 import java.util.concurrent.Semaphore
 
 
@@ -206,9 +206,9 @@ class GraphDbOperator implements GraphInterface {
 	List getAllVertices(String idProp) {
 		List vertices = []
 		if (idProp) {
-			g.V[idProp].aggregate(vertices) >> -1
+			g.V[idProp].aggregate(vertices).iterate()
 		} else {
-			g.V.aggregate(vertices) >> -1
+			g.V.aggregate(vertices).iterate()
 		}
 
 		return vertices
@@ -217,9 +217,9 @@ class GraphDbOperator implements GraphInterface {
 	List<Edge> getAllEdges(String idProp) {
 		List edges = []
 		if (idProp) {
-			g.E[idProp].aggregate(edges) >> -1
+			g.E[idProp].aggregate(edges).iterate()
 		} else {
-			g.E.aggregate(edges) >> -1
+			g.E.aggregate(edges).iterate()
 		}
 
 		return edges
@@ -242,32 +242,32 @@ class GraphDbOperator implements GraphInterface {
 		List tempList = []
 		if (idProp) {
 			if (alongEdge) {
-				v.bothE(alongEdge).bothV.filter { node -> !node.id.equals(v.id) }[idProp].aggregate(neighbors) >> -1
+				v.bothE(alongEdge).bothV.filter { node -> !node.id.equals(v.id) }[idProp].aggregate(neighbors).iterate()
 				//add current node back if there is a self-connecting edge
-				v.outE(alongEdge).inV.filter { node -> node.id.equals(v.id) }[idProp].aggregate(tempList) >> -1
+				v.outE(alongEdge).inV.filter { node -> node.id.equals(v.id) }[idProp].aggregate(tempList).iterate()
 				if (tempList.size() > 0) {
 					neighbors += tempList
 				}
 			} else {
-				v.bothE.bothV.filter { node -> !node.id.equals(v.id) }[idProp].aggregate(neighbors) >> -1
+				v.bothE.bothV.filter { node -> !node.id.equals(v.id) }[idProp].aggregate(neighbors).iterate()
 				//add current node back if there is a self-connecting edge
-				v.outE.inV.filter { node -> node.id.equals(v.id) }[idProp].aggregate(tempList) >> -1
+				v.outE.inV.filter { node -> node.id.equals(v.id) }[idProp].aggregate(tempList).iterate()
 				if (tempList.size() > 0) {
 					neighbors += tempList
 				}
 			}
 		} else {
 			if (alongEdge) {
-				v.bothE(alongEdge).bothV.filter { node -> !node.id.equals(v.id) }.aggregate(neighbors) >> -1
+				v.bothE(alongEdge).bothV.filter { node -> !node.id.equals(v.id) }.aggregate(neighbors).iterate()
 				//add current node back if there is a self-connecting edge
-				v.outE(alongEdge).inV.filter { node -> node.id.equals(v.id) }.aggregate(tempList) >> -1
+				v.outE(alongEdge).inV.filter { node -> node.id.equals(v.id) }.aggregate(tempList).iterate()
 				if (tempList.size() > 0) {
 					neighbors += tempList
 				}
 			} else {
-				v.bothE.bothV.filter { node -> !node.id.equals(v.id) }.aggregate(neighbors) >> -1
+				v.bothE.bothV.filter { node -> !node.id.equals(v.id) }.aggregate(neighbors).iterate()
 				//add current node back if there is a self-connecting edge
-				v.outE.inV.filter { node -> node.id.equals(v.id) }.aggregate(tempList) >> -1
+				v.outE.inV.filter { node -> node.id.equals(v.id) }.aggregate(tempList).iterate()
 				if (tempList.size() > 0) {
 					neighbors += tempList
 				}
@@ -310,17 +310,17 @@ class GraphDbOperator implements GraphInterface {
 		def edges = []
 		if (edgeLabel) {
 			if (v1.id.equals(v2.id)) {
-				v1.outE(edgeLabel).inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.outE(edgeLabel).inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges).iterate()
 			} else {
-				v1.outE(edgeLabel).inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
-				v1.inE(edgeLabel).outV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.outE(edgeLabel).inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges).iterate()
+				v1.inE(edgeLabel).outV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges).iterate()
 			}
 		} else {
 			if (v1.id.equals(v2.id)) {
-				v1.outE.inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.outE.inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges).iterate()
 			} else {
-				v1.outE.inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
-				v1.inE.outV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges) >> -1
+				v1.outE.inV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges).iterate()
+				v1.inE.outV.filter{it.id.equals(v2.id)}.back(2).aggregate(edges).iterate()
 			}
 		}
 
@@ -330,9 +330,9 @@ class GraphDbOperator implements GraphInterface {
 	List<Edge> getOutgoingEdges(Vertex vv, String edgeLabel) {
 		def edges = []
 		if (edgeLabel) {
-			vv.outE(edgeLabel).aggregate(edges) >> -1
+			vv.outE(edgeLabel).aggregate(edges).iterate()
 		} else {
-			vv.outE.aggregate(edges) >> -1
+			vv.outE.aggregate(edges).iterate()
 		}
 
 		return edges
@@ -341,9 +341,9 @@ class GraphDbOperator implements GraphInterface {
 	List<Edge> getIncomingEdges(Vertex vv, String edgeLabel) {
 		def edges = []
 		if (edgeLabel) {
-			vv.inE(edgeLabel).aggregate(edges) >> -1
+			vv.inE(edgeLabel).aggregate(edges).iterate()
 		} else {
-			vv.inE.aggregate(edges) >> -1
+			vv.inE.aggregate(edges).iterate()
 		}
 
 		return edges

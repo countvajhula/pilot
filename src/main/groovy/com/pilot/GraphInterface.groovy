@@ -3,7 +3,7 @@ package com.pilot
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
 import com.tinkerpop.blueprints.pgm.impls.orientdb.*
-import com.tinkerpop.gremlin.*
+import com.tinkerpop.gremlin.groovy.*
 
 
 /** Captures all the graph operations provided by Pilot
