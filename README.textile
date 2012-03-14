@@ -20,7 +20,7 @@ Pilot aims to support graph databases conforming to the "property graph model":h
 
 * Planned additions:
 ** Support for "Furnace":https://github.com/tinkerpop/furnace/wiki
-** FOAF
+** FOAF(n)
 ** DFS
 ** BFS
 

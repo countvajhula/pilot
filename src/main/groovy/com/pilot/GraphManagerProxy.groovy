@@ -7,6 +7,7 @@ import com.tinkerpop.blueprints.pgm.impls.orientdb.*
 import java.util.concurrent.Semaphore
 import java.io.StringWriter
 import java.io.PrintWriter
+import GraphInterface.GraphProvider
 
 
 /** Transparently manages transactions and multithreading by intercepting
@@ -28,16 +29,16 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 	private static int MS_IN_NS = 1000000
 	
-	public static Object initializeGraph(String url, GraphInterface.GraphProvider provider, boolean readOnly) throws Exception {
+	public static Object initializeGraph(String url, GraphProvider provider, boolean readOnly) throws Exception {
 		Object proxiedObj
 		switch (provider) {
-			case GraphInterface.GraphProvider.TINKERGRAPH:
+			case GraphProvider.TINKERGRAPH:
 				proxiedObj = new TinkerGraphOperator(url, readOnly)
 				break
-			case GraphInterface.GraphProvider.ORIENTDB:
+			case GraphProvider.ORIENTDB:
 				proxiedObj = new OrientDbOperator(url, readOnly)
 				break
-			case GraphInterface.GraphProvider.NEO4J:
+			case GraphProvider.NEO4J:
 				proxiedObj = new Neo4jOperator(url, readOnly)
 				break
 			default:

@@ -36,4 +36,11 @@ class TinkerGraphOperator extends GraphDbOperator implements GraphInterface {
 		return g.getEdge(id)
 	}
 
+	void shutdown() {
+		if (g) {
+			g.shutdown()
+			g = null
+		}
+	}
+
 }

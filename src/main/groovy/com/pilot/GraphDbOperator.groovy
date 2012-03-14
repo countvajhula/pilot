@@ -4,67 +4,56 @@ import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
 import com.tinkerpop.gremlin.groovy.*
 import java.util.concurrent.Semaphore
+import GraphInterface.MutationIntent
 
 
 /** Implements high-level graph operations that may be used by the application.
  */
 class GraphDbOperator implements GraphInterface {
 
+	protected Graph g
+	protected String graphUrl
+	protected boolean transactionInProgress
+	protected MutationIntent mutationIntent
+	protected static EnumMap<MutationIntent, Integer> MutationsBeforeCommit
+	protected static Map graphWriteConnectionLocks = [:] //can be private?
+	protected boolean readOnly //can be private?
+
 	static {
 		// load gremlin for graph traversals
 		Gremlin.load()
 
 		//define # mutations before commit for each transaction mode
-		MutationsBeforeCommit = new EnumMap(GraphInterface.MutationIntent.class)
-		MutationsBeforeCommit[GraphInterface.MutationIntent.STANDARDTRANSACTION] = 1000
-		MutationsBeforeCommit[GraphInterface.MutationIntent.BATCHINSERT] = 1
-		MutationsBeforeCommit[GraphInterface.MutationIntent.NONTRANSACTION] = 1
+		MutationsBeforeCommit = new EnumMap(MutationIntent.class)
+		MutationsBeforeCommit[MutationIntent.STANDARDTRANSACTION] = 1000
+		MutationsBeforeCommit[MutationIntent.BATCHINSERT] = 1
+		MutationsBeforeCommit[MutationIntent.NONTRANSACTION] = 1
 	}
 
-	protected Graph g
-	protected String graphUrl
-	protected boolean transactionInProgress
-	protected GraphInterface.MutationIntent mutationIntent
-	protected static EnumMap<GraphInterface.MutationIntent, Integer> MutationsBeforeCommit
-	protected static Map graphWriteConnectionLocks = [:] //can be private?
-	protected boolean readOnly //can be private?
-	
 	//TODO:
 	//FOAF, with degree as input
 	//BFS, DFS (iterators)
 	//change all returned results to iterators, + add convenience list functions
 
-	public GraphDbOperator(String url, boolean readOnly) {
-		Semaphore graphWriteConnectionLock
-		graphWriteConnectionLock = graphWriteConnectionLocks[url]
-		if (!graphWriteConnectionLock) {
-			graphWriteConnectionLock = new Semaphore(1, true)
-			graphWriteConnectionLocks[url] = graphWriteConnectionLock
-		}
-		mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
-		transactionInProgress = false
-	}
-
-	//change to return status
 	//TODO: remove readOnly flag in future when pessimistic locking is supported by underlying db
-	void initializeGraph(String url, boolean readOnly) throws Exception {
+	public GraphDbOperator(String url, boolean readOnly) {
+		synchronized (graphWriteConnectionLocks) {
+			if (!graphWriteConnectionLocks[url]) {
+				graphWriteConnectionLocks[url] = new Semaphore(1, true)
+			}
+		}
 		this.readOnly = readOnly
 		if (!readOnly) {
-			graphWriteConnectionLocks[url].acquire()
+			try {
+				graphWriteConnectionLocks[url].acquire()
+			} catch (Exception e) {
+				throw new RuntimeException("Error in acquiring semaphore! url:${url}")
+			}
 			println "-ACQUIRED- GRAPH WRITE CONNECTION [${url}]"
 		}
+		mutationIntent = MutationIntent.STANDARDTRANSACTION
+		transactionInProgress = false
 		graphUrl = url
-	}
-
-	void reinitializeGraph() {
-		if (graphUrl) {
-			if (!readOnly) {
-				graphWriteConnectionLocks[graphUrl].release()
-			}
-			initializeGraph(graphUrl, readOnly)
-		} else {
-			println "db URL or provider not found!"
-		}
 	}
 
 	void shutdown() {
@@ -73,8 +62,7 @@ class GraphDbOperator implements GraphInterface {
 				graphWriteConnectionLocks[graphUrl].release()
 				println "-RELEASED- GRAPH WRITE CONNECTION [${graphUrl}]"
 			}
-			g.shutdown()
-			g = null
+			// individual graph implementations MUST shutdown the db and set g = null
 		}
 	}
 
@@ -89,7 +77,7 @@ class GraphDbOperator implements GraphInterface {
 	/** Begins a STANDARD managed transaction using a default transaction buffer size */
 	void beginManagedTransaction() {
 		if (!transactionInProgress) {
-			mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
+			mutationIntent = MutationIntent.STANDARDTRANSACTION
 		}
 		beginManagedTransaction(MutationsBeforeCommit[mutationIntent])
 	}
@@ -106,8 +94,8 @@ class GraphDbOperator implements GraphInterface {
 			println "Cannot begin transaction on non-transactional graph! Continuing without transactions..."
 			return
 		}
-		if (mutationIntent == GraphInterface.MutationIntent.NONTRANSACTION) {
-			mutationIntent = GraphInterface.MutationIntent.STANDARDTRANSACTION
+		if (mutationIntent == MutationIntent.NONTRANSACTION) {
+			mutationIntent = MutationIntent.STANDARDTRANSACTION
 		}
 		if (!numMutations) {
 			numMutations = MutationsBeforeCommit[mutationIntent]
@@ -120,7 +108,7 @@ class GraphDbOperator implements GraphInterface {
 
 	/** Begins a managed transaction of the specified type (currently either
 	 * STANDARD or BATCH) */
-	void beginManagedTransaction(GraphInterface.MutationIntent transactionType) {
+	void beginManagedTransaction(MutationIntent transactionType) {
 		//implementation will be provider-specific
 		if (!transactionInProgress) {
 			mutationIntent = transactionType
@@ -136,8 +124,8 @@ class GraphDbOperator implements GraphInterface {
 				interruptManagedTransaction()
 				g.stopTransaction(TransactionalGraph.Conclusion.SUCCESS)
 			}
-			mutationIntent = GraphInterface.MutationIntent.NONTRANSACTION
-			g.setMaxBufferSize(MutationsBeforeCommit[GraphInterface.MutationIntent.NONTRANSACTION])
+			mutationIntent = MutationIntent.NONTRANSACTION
+			g.setMaxBufferSize(MutationsBeforeCommit[MutationIntent.NONTRANSACTION])
 			transactionInProgress = false
 			println "managed transaction concluded."
 		} else {

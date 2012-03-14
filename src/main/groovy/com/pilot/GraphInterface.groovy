@@ -22,8 +22,6 @@ public interface GraphInterface {
 		NONTRANSACTION;
 	}
 
-	void initializeGraph(String url, boolean readOnly) throws Exception;
-	void reinitializeGraph(); //internal
 	void shutdown();
 	Graph getGraph();
 	String getGraphUrl();

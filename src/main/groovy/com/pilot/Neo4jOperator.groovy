@@ -4,25 +4,31 @@ import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
 import com.tinkerpop.blueprints.pgm.impls.neo4j.*
 import com.tinkerpop.blueprints.pgm.impls.neo4jbatch.*
+import GraphInterface.MutationIntent
 
 
 class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 
+	static Map connectionPool = [:] // neo4j requires a single graph handle to be open per graph per JVM instance
+
 	public Neo4jOperator(String url, boolean readOnly) {
+
 		super(url, readOnly)
-		initializeGraph (url, readOnly)
-	}
 
-	void initializeGraph (String url, boolean readOnly) throws Exception {
-
-		super.initializeGraph(url, readOnly)
-
-		g = new Neo4jGraph(url)
-		if (!g) {
-			throw new Exception("Could not create Neo4jGraph object for URL: ${url}!")
+		synchronized(connectionPool) {
+			if (!connectionPool[url]) {
+				Graph g_global = new Neo4jGraph(url)
+				if (!g_global) {
+					throw new Exception("Could not create Neo4jGraph object for URL: ${url}!")
+				}
+				connectionPool[url] = ['graph':g_global, 'nActiveConnections':0]
+				println "Neo4j graph initialized."
+			}
+			g = connectionPool[url]['graph']
+			connectionPool[url]['nActiveConnections'] += 1
 		}
 
-		println "Neo4j graph initialized."
+		println "Neo4j graph connection obtained."
 	}
 
 	Vertex getVertex(long id) {
@@ -33,10 +39,10 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 		return g.getEdge(id)
 	}
 
-	void beginManagedTransaction(GraphInterface.MutationIntent transactionType) {
+	void beginManagedTransaction(MutationIntent transactionType) {
 		if (!transactionInProgress) {
 			switch (transactionType) {
-				case GraphInterface.MutationIntent.BATCHINSERT:
+				case MutationIntent.BATCHINSERT:
 					//shutdown standard neo4j handle
 					g.shutdown()
 					//load it as a batchgraph
@@ -53,12 +59,29 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 
 	void concludeManagedTransaction() {
 		if (transactionInProgress) {
-			if (mutationIntent == GraphInterface.MutationIntent.BATCHINSERT) {
+			if (mutationIntent == MutationIntent.BATCHINSERT) {
 				g.shutdown()
 				g = new Neo4jGraph(graphUrl)
 			}
 		}
 		super.concludeManagedTransaction()
+	}
+
+	void shutdown() {
+		if (g) {
+			super.shutdown()
+			synchronized(connectionPool) {
+				connectionPool[graphUrl]['nActiveConnections'] -= 1
+
+				if (connectionPool[graphUrl]['nActiveConnections'] <= 0) {
+					connectionPool[graphUrl]['graph'].shutdown()
+					connectionPool[graphUrl] = null
+					println "Neo4j graph shutdown."
+				}
+			}
+			g = null
+			println "Neo4j graph connection released."
+		}
 	}
 
 }

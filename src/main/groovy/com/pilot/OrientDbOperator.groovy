@@ -11,6 +11,7 @@ import com.orientechnologies.orient.core.config.*
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
 import com.tinkerpop.blueprints.pgm.impls.orientdb.*
+import GraphInterface.MutationIntent
 
 
 class OrientDbOperator extends GraphDbOperator implements GraphInterface {
@@ -18,13 +19,8 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 	public static final String STORAGE_MODE = "local"
 
 	public OrientDbOperator(String url, boolean readOnly) {
+
 		super(url, readOnly)
-		initializeGraph (url, readOnly)
-	}
-
-	void initializeGraph (String url, boolean readOnly) throws Exception {
-
-		super.initializeGraph(url, readOnly)
 
 		OGlobalConfiguration.STORAGE_KEEP_OPEN.setValue(Boolean.TRUE);
 
@@ -60,10 +56,10 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 		return edge
 	}
 
-	void beginManagedTransaction(GraphInterface.MutationIntent transactionType) {
+	void beginManagedTransaction(MutationIntent transactionType) {
 		if (!transactionInProgress) {
 			switch (transactionType) {
-				case GraphInterface.MutationIntent.BATCHINSERT:
+				case MutationIntent.BATCHINSERT:
 					g.getRawGraph().declareIntent(new OIntentMassiveInsert())
 					break
 				default:
@@ -76,11 +72,18 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 
 	void concludeManagedTransaction() {
 		if (transactionInProgress) {
-			if (mutationIntent == GraphInterface.MutationIntent.BATCHINSERT) {
+			if (mutationIntent == MutationIntent.BATCHINSERT) {
 				g.getRawGraph().declareIntent(null)
 			}
 		}
 		super.concludeManagedTransaction()
+	}
+
+	void shutdown() {
+		if (g) {
+			g.shutdown()
+			g = null
+		}
 	}
 
 }
