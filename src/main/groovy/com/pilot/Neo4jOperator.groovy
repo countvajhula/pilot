@@ -11,13 +11,20 @@ class Neo4jOperator extends GraphDbOperator implements GraphInterface {
 
 	static Map connectionPool = [:] // neo4j requires a single graph handle to be open per graph per JVM instance
 
-	public Neo4jOperator(String url, boolean readOnly) {
+	public Neo4jOperator(String url, boolean readOnly, boolean upgradeIfNecessary) {
 
 		super(url, readOnly)
 
 		synchronized(connectionPool) {
 			if (!connectionPool[url]) {
-				Graph g_global = new Neo4jGraph(url)
+				Graph g_global
+				if (upgradeIfNecessary) {
+					Map<String, String> config = new HashMap<String, String>()
+					config.put("allow_store_upgrade", "true")
+					g_global = new Neo4jGraph(url, config)
+				} else {
+					g_global = new Neo4jGraph(url)
+				}
 				if (!g_global) {
 					throw new Exception("Could not create Neo4jGraph object for URL: ${url}!")
 				}

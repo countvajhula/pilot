@@ -7,7 +7,8 @@ import com.tinkerpop.blueprints.pgm.impls.tg.*
 
 class TinkerGraphOperator extends GraphDbOperator implements GraphInterface {
 
-	public TinkerGraphOperator(String url, boolean readOnly) {
+	public TinkerGraphOperator(String url, boolean readOnly, boolean upgradeIfNecessary) {
+		//upgradeIfNecessary currently not implemented
 		super(url, readOnly)
 		initializeGraph (url, readOnly)
 	}

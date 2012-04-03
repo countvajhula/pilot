@@ -29,17 +29,26 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 	private static int MS_IN_NS = 1000000
 	
+	public static Object initializeGraph(String url, GraphProvider provider) throws Exception {
+		return initializeGraph(url, provider, false)
+	}
+
 	public static Object initializeGraph(String url, GraphProvider provider, boolean readOnly) throws Exception {
+		return initializeGraph(url, provider, readOnly, false)
+	}
+
+	public static Object initializeGraph(String url, GraphProvider provider, boolean readOnly, boolean upgradeIfNecessary) throws Exception {
 		Object proxiedObj
+
 		switch (provider) {
 			case GraphProvider.TINKERGRAPH:
-				proxiedObj = new TinkerGraphOperator(url, readOnly)
+				proxiedObj = new TinkerGraphOperator(url, readOnly, upgradeIfNecessary)
 				break
 			case GraphProvider.ORIENTDB:
-				proxiedObj = new OrientDbOperator(url, readOnly)
+				proxiedObj = new OrientDbOperator(url, readOnly, upgradeIfNecessary)
 				break
 			case GraphProvider.NEO4J:
-				proxiedObj = new Neo4jOperator(url, readOnly)
+				proxiedObj = new Neo4jOperator(url, readOnly, upgradeIfNecessary)
 				break
 			default:
 				throw new Exception("Graph provider invalid or not supported!")

@@ -18,7 +18,8 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 
 	public static final String STORAGE_MODE = "local"
 
-	public OrientDbOperator(String url, boolean readOnly) {
+	public OrientDbOperator(String url, boolean readOnly, boolean upgradeIfNecessary) {
+		//upgradeIfNecessary currently not implemented
 
 		super(url, readOnly)
 
