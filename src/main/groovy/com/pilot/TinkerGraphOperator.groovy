@@ -33,6 +33,7 @@ class TinkerGraphOperator extends GraphDbOperator implements GraphInterface {
 
 	void shutdown() {
 		if (g) {
+			super.shutdown()
 			g.shutdown()
 			g = null
 		}
