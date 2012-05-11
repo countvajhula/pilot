@@ -10,12 +10,6 @@ class TinkerGraphOperator extends GraphDbOperator implements GraphInterface {
 	public TinkerGraphOperator(String url, boolean readOnly, boolean upgradeIfNecessary) {
 		//upgradeIfNecessary currently not implemented
 		super(url, readOnly)
-		initializeGraph (url, readOnly)
-	}
-
-	void initializeGraph (String url, boolean readOnly) throws Exception {
-
-		super.initializeGraph(url, readOnly)
 
 		if (url) {
 			g = new TinkerGraph(url) //will be serialized to disk upon shutdown()
