@@ -18,6 +18,9 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 
 	public static final String STORAGE_MODE = "local"
 
+	private int vertexClusterId = 5
+	private int edgeClusterId = 6
+
 	public OrientDbOperator(String url, boolean readOnly, boolean upgradeIfNecessary) {
 		//upgradeIfNecessary currently not implemented
 
@@ -34,16 +37,18 @@ class OrientDbOperator extends GraphDbOperator implements GraphInterface {
 		if (!g) {
 			throw new Exception("Could not create OrientGraph object for URL: ${url}!")
 		}
+		vertexClusterId = g.getRawGraph().getVertexBaseClass().getDefaultClusterId()
+		edgeClusterId = g.getRawGraph().getEdgeBaseClass().getDefaultClusterId()
 
 		println "OrientDB graph initialized."
 	}
 
 	Vertex getVertex(long id) {
-		return g.getVertex("#5:"+id) //TODO:test
+		return g.getVertex("#" + vertexClusterId + ":" + id) //TODO:test
 	}
 
 	Edge getEdge(long id) {
-		return g.getEdge("#6:"+id)
+		return g.getEdge("#" + edgeClusterId + ":" + id)
 	}
 
 	// use raw API to do a faster edge retrieval
