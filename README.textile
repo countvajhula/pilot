@@ -32,15 +32,15 @@ To build the JAR using "Maven":http://maven.apache.org (recommended):
 # Clone the repository on your machine
 # In the root folder, type 'mvn clean install'
 # Once the build completes, copy the JAR file in the target/ folder into your system or project classpath location
-# You can now use Pilot in your project by adding the import 'import com.pilot.*'
+# You can now use Pilot in your project by adding the import 'import com.countvajhula.pilot.*'
 
 To create the JAR manually from source (you will need to have the dependencies -- Blueprints, Neo4j, OrientDB, Gremlin -- already present in your system classpath):
 # Clone the repository on your machine
 # Go to the folder /src which contains the Pilot Groovy source files
-# Type 'groovyc *.groovy' -- this will create a directory structure com/pilot in the current directory
-# Now type 'jar -cf pilot.jar com/pilot/*.class' -- this will create the file 'pilot.jar' in the current directory
+# Type 'groovyc *.groovy' -- this will create a directory structure com/countvajhula/pilot in the current directory
+# Now type 'jar -cf pilot.jar com/countvajhula/pilot/*.class' -- this will create the file 'pilot.jar' in the current directory
 # Copy this JAR into a system classpath location
-# Now you can use Pilot in your project by adding the import 'import com.pilot.*'
+# Now you can use Pilot in your project by adding the import 'import com.countvajhula.pilot.*'
 
 h1. Examples
 

@@ -1,4 +1,4 @@
-package com.pilot
+package com.countvajhula.pilot
 
 import com.orientechnologies.common.collection.*
 import com.orientechnologies.common.*

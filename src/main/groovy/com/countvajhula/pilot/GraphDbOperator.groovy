@@ -1,4 +1,4 @@
-package com.pilot
+package com.countvajhula.pilot
 
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*

@@ -1,4 +1,4 @@
-package com.pilot
+package com.countvajhula.pilot
 
 import java.lang.reflect.*
 import com.tinkerpop.blueprints.*
