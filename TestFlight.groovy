@@ -1,8 +1,8 @@
 #!/usr/bin/env groovy
 
-import com.pilot.*
-import com.pilot.GraphInterface.GraphProvider
-import com.pilot.GraphInterface.MutationIntent
+import com.countvajhula.pilot.*
+import com.countvajhula.pilot.GraphInterface.GraphProvider
+import com.countvajhula.pilot.GraphInterface.MutationIntent
 import com.tinkerpop.blueprints.*
 import com.tinkerpop.blueprints.pgm.*
 
