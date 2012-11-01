@@ -86,5 +86,5 @@ String results = GraphManagerProxy.stopProfiler(myGraph)
 
 h1. Documentation
 
-The "Wiki":https://github.com/countvajhula/pilot/wiki would be a good place to start. Also try the demo script TestFlight.groovy for a working implementation of some of the features.
+The "Wiki":https://github.com/countvajhula/pilot/wiki would be a good place to start. Also try the demo script "TestFlight.groovy":http://github.com/countvajhula/testflight for a working implementation of some of the features.
 
