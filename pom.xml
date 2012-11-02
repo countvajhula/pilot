@@ -40,15 +40,17 @@
 				<enabled>false</enabled>
 			</snapshots>
 		</repository>
-		<repository> 
-			<id>orientechnologies-repository</id> 
-			<name>Orient Technologies Maven2 Repository</name> 
-			<url>http://www.orientechnologies.com/listing/m2</url> 
-			<snapshots> 
-				<enabled>true</enabled> 
-				<updatePolicy>always</updatePolicy> 
-			</snapshots> 
-		</repository> 
+		<repository>
+			<id>sonatype-nexus-snapshots</id>
+			<name>Sonatype Nexus Snapshots</name>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			<releases>
+				<enabled>false</enabled>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
 	</repositories>
 
 	<dependencies>
@@ -162,6 +164,24 @@
 								<source>src/test/groovy</source>
 							</sources>
 						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.9</version>
+				<configuration> 
+					<outputDirectory>${project.build.directory}/javadoc</outputDirectory>
+					<reportOutputDirectory>${project.reporting.outputDirectory}/javadoc</reportOutputDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<phase>install</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
 					</execution>
 				</executions>
 			</plugin>
