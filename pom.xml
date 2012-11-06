@@ -12,7 +12,7 @@
 	<groupId>com.countvajhula</groupId>
 	<artifactId>pilot</artifactId>
 	<name>Pilot</name>
-	<version>1.1-SNAPSHOT</version>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
 	<url>https://github.com/countvajhula/pilot</url>
 	<description>A graph database operator</description>
@@ -167,8 +167,7 @@
 				<executions>
 					<execution>
 						<id>groovydoc</id>
-						<!--<phase>site</phase>-->
-						<phase>install</phase>
+						<phase>site</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
@@ -187,8 +186,39 @@
 					</execution>
 					<execution>
 						<id>groovydocjar</id>
-						<!--<phase>site</phase>-->
-						<phase>install</phase>
+						<phase>site</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target name="jar">
+								<jar destfile="${project.build.directory}/${project.artifactId}-${project.version}-javadoc.jar" basedir="${project.reporting.outputDirectory}/groovydoc">
+								</jar>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>groovydocdeploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<target>
+								<taskdef name="groovydoc" classname="org.codehaus.groovy.ant.Groovydoc" classpathref="maven.compile.classpath" />
+								<groovydoc destdir="${project.reporting.outputDirectory}/groovydoc" sourcepath="${basedir}/src/main/groovy" use="true" windowtitle="${project.name}" doctitle="${project.name}">
+									<link packages="java.,org.xml.,javax.,org.xml." href="http://download.oracle.com/javase/6/docs/api" />
+									<link packages="org.apache.tools.ant." href="http://evgeny-goldin.org/javadoc/ant/api" />
+									<link packages="org.junit.,junit.framework." href="http://kentbeck.github.com/junit/javadoc/latest" />
+									<link packages="groovy.,org.codehaus.groovy." href="http://groovy.codehaus.org/api/" />
+									<link packages="org.codehaus.gmaven." href="http://evgeny-goldin.org/javadoc/gmaven" />
+								</groovydoc>
+							</target>
+						</configuration>
+					</execution>
+					<execution>
+						<id>groovydocjardeploy</id>
+						<phase>deploy</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
