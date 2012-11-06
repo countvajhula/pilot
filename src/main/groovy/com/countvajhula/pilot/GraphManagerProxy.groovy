@@ -29,14 +29,29 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 
 	private static int MS_IN_NS = 1000000
 	
+	/** Initializes a graph
+	 * @param url the location of the graph
+	 * @param provider the graph provider to use (Tinkergraph, Neo4j, and OrientDB are currently supported)
+	 */
 	public static Object initializeGraph(String url, GraphProvider provider) throws Exception {
 		return initializeGraph(url, provider, false)
 	}
 
+	/** Initializes a graph
+	 * @param url the location of the graph
+	 * @param provider the graph provider to use (Tinkergraph, Neo4j, and OrientDB are currently supported)
+	 * @param readOnly true if this handle will only be used to read from and perform traversals on the graph (optimizes performance)
+	 */
 	public static Object initializeGraph(String url, GraphProvider provider, boolean readOnly) throws Exception {
 		return initializeGraph(url, provider, readOnly, false)
 	}
 
+	/** Initializes a graph
+	 * @param url the location of the graph
+	 * @param provider the graph provider to use (Tinkergraph, Neo4j, and OrientDB are currently supported)
+	 * @param readOnly true if this handle will only be used to read from and perform traversals on the graph (optimizes performance)
+	 * @param upgradeIfNecessary upgrades the underlying graph database if it was created with an older version of the library
+	 */
 	public static Object initializeGraph(String url, GraphProvider provider, boolean readOnly, boolean upgradeIfNecessary) throws Exception {
 		Object proxiedObj
 
@@ -178,11 +193,22 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 		return result
 	}
 
+	/** Starts the profiler, which measures the time and proportion of time spent
+	 * in different operations, a full report of which is displayed when the profiler
+	 * is stopped.
+	 * @param operator the graph operator instance to profile
+	 * @param profileName the name of the profile - displayed in the final report
+	 */
 	public static void startProfiler(GraphInterface operator, String profileName) {
 		GraphManagerProxy managerProxy = managerProxyForGraphOperator[operator]
 		managerProxy.startProfiler_(profileName)
 	}
 
+	/** Starts the profiler, which measures the time and proportion of time spent
+	 * in different operations, a full report of which is displayed when the profiler
+	 * is stopped.
+	 * @param operator the graph operator instance to profile
+	 */
 	public static void startProfiler(GraphInterface operator) {
 		GraphManagerProxy.startProfiler(operator, null)
 	}
@@ -201,6 +227,9 @@ public class GraphManagerProxy implements java.lang.reflect.InvocationHandler {
 		}
 	}
 
+	/** Stops the profiler and displays a report with a breakdown of time spent and proportion of
+	 * time spent in each operation during the profiling period.
+	 */
 	public static String stopProfiler(GraphInterface operator) {
 		GraphManagerProxy managerProxy = managerProxyForGraphOperator[operator]
 		return managerProxy.stopProfiler()

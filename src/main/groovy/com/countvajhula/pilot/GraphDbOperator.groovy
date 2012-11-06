@@ -7,7 +7,7 @@ import java.util.concurrent.Semaphore
 import GraphInterface.MutationIntent
 
 
-/** Implements high-level graph operations that may be used by the application.
+/** Provides a default implementation of the graph operations provided by Pilot in GraphInterface.groovy. Provider-specific classes may extend or override this implementation.
  */
 class GraphDbOperator implements GraphInterface {
 
@@ -56,6 +56,8 @@ class GraphDbOperator implements GraphInterface {
 		graphUrl = url
 	}
 
+	// {@inheritDoc} -- doesn't work in groovydoc :(
+	// see {@link com.countvajhula.pilot.GraphInterface#shutdown shutdown() }
 	void shutdown() {
 		if (g) {
 			if (!readOnly) {
@@ -74,7 +76,6 @@ class GraphDbOperator implements GraphInterface {
 		return graphUrl
 	}
 
-	/** Begins a STANDARD managed transaction using a default transaction buffer size */
 	void beginManagedTransaction() {
 		if (!transactionInProgress) {
 			mutationIntent = MutationIntent.STANDARDTRANSACTION
@@ -82,8 +83,6 @@ class GraphDbOperator implements GraphInterface {
 		beginManagedTransaction(MutationsBeforeCommit[mutationIntent])
 	}
 
-	/** Begins a managed transaction and uses the specified number of
-	 * mutations as the size of the transaction buffer */
 	void beginManagedTransaction(int numMutations) {
 		if (transactionInProgress) {
 			//TODO: better to throw a custom exception and handle it in GraphManagerProxy
@@ -106,8 +105,6 @@ class GraphDbOperator implements GraphInterface {
 		println "managed transaction begun..."
 	}
 
-	/** Begins a managed transaction of the specified type (currently either
-	 * STANDARD or BATCH) */
 	void beginManagedTransaction(MutationIntent transactionType) {
 		//implementation will be provider-specific
 		if (!transactionInProgress) {
@@ -223,39 +220,39 @@ class GraphDbOperator implements GraphInterface {
 
 	//TODO: return an iterator over neighbors. current behavior can be captured
 	//in a separate function getNeighborList, which calls aggregate on the returned pipe
-	List getNeighbors(Vertex v, String idProp, String alongEdge) {
+	List getNeighbors(Vertex vv, String idProp, String alongEdge) {
 		//idProp is the property of the result vertices that will be returned
 		//if null, then the vertices themselves will be returned
 		List neighbors = []
 		List tempList = []
 		if (idProp) {
 			if (alongEdge) {
-				v.bothE(alongEdge).bothV.filter { node -> !node.id.equals(v.id) }[idProp].aggregate(neighbors).iterate()
+				vv.bothE(alongEdge).bothV.filter { node -> !node.id.equals(vv.id) }[idProp].aggregate(neighbors).iterate()
 				//add current node back if there is a self-connecting edge
-				v.outE(alongEdge).inV.filter { node -> node.id.equals(v.id) }[idProp].aggregate(tempList).iterate()
+				vv.outE(alongEdge).inV.filter { node -> node.id.equals(vv.id) }[idProp].aggregate(tempList).iterate()
 				if (tempList.size() > 0) {
 					neighbors += tempList
 				}
 			} else {
-				v.bothE.bothV.filter { node -> !node.id.equals(v.id) }[idProp].aggregate(neighbors).iterate()
+				vv.bothE.bothV.filter { node -> !node.id.equals(vv.id) }[idProp].aggregate(neighbors).iterate()
 				//add current node back if there is a self-connecting edge
-				v.outE.inV.filter { node -> node.id.equals(v.id) }[idProp].aggregate(tempList).iterate()
+				vv.outE.inV.filter { node -> node.id.equals(vv.id) }[idProp].aggregate(tempList).iterate()
 				if (tempList.size() > 0) {
 					neighbors += tempList
 				}
 			}
 		} else {
 			if (alongEdge) {
-				v.bothE(alongEdge).bothV.filter { node -> !node.id.equals(v.id) }.aggregate(neighbors).iterate()
+				vv.bothE(alongEdge).bothV.filter { node -> !node.id.equals(vv.id) }.aggregate(neighbors).iterate()
 				//add current node back if there is a self-connecting edge
-				v.outE(alongEdge).inV.filter { node -> node.id.equals(v.id) }.aggregate(tempList).iterate()
+				vv.outE(alongEdge).inV.filter { node -> node.id.equals(vv.id) }.aggregate(tempList).iterate()
 				if (tempList.size() > 0) {
 					neighbors += tempList
 				}
 			} else {
-				v.bothE.bothV.filter { node -> !node.id.equals(v.id) }.aggregate(neighbors).iterate()
+				vv.bothE.bothV.filter { node -> !node.id.equals(vv.id) }.aggregate(neighbors).iterate()
 				//add current node back if there is a self-connecting edge
-				v.outE.inV.filter { node -> node.id.equals(v.id) }.aggregate(tempList).iterate()
+				vv.outE.inV.filter { node -> node.id.equals(vv.id) }.aggregate(tempList).iterate()
 				if (tempList.size() > 0) {
 					neighbors += tempList
 				}
@@ -265,8 +262,8 @@ class GraphDbOperator implements GraphInterface {
 		return neighbors
 	}
 
-	List getNeighbors(Vertex v) {
-		return getNeighbors(v, null, null)
+	List getNeighbors(Vertex vv) {
+		return getNeighbors(vv, null, null)
 	}
 
 	Iterable<Vertex> getVertex(String property, Object value) {
