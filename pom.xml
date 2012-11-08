@@ -199,7 +199,7 @@
 					</execution>
 					<execution>
 						<id>groovydocdeploy</id>
-						<phase>deploy</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
@@ -218,7 +218,7 @@
 					</execution>
 					<execution>
 						<id>groovydocjardeploy</id>
-						<phase>deploy</phase>
+						<phase>compile</phase>
 						<goals>
 							<goal>run</goal>
 						</goals>
