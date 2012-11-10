@@ -162,22 +162,6 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-<<<<<<< HEAD
-				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>2.9</version>
-				<configuration> 
-					<outputDirectory>${project.build.directory}/javadoc</outputDirectory>
-					<reportOutputDirectory>${project.reporting.outputDirectory}/javadoc</reportOutputDirectory>
-				</configuration>
-				<executions>
-					<execution>
-						<id>attach-javadocs</id>
-						<phase>install</phase>
-						<goals>
-							<goal>jar</goal>
-						</goals>
-					</execution>
-=======
 				<artifactId>maven-antrun-plugin</artifactId>
 				<version>1.7</version>
 				<executions>
@@ -230,7 +214,6 @@
 						</configuration>
 					</execution>
 					-->
->>>>>>> release-1.0
 				</executions>
 			</plugin>
 		</plugins>
